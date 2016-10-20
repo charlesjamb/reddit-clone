@@ -10,14 +10,24 @@ var insertPost = `
   (userId, title, url, createdAt, updatedAt) 
   VALUES (?, ?, ?, ?, ?)
 `;
+var insertSub = `
+  INSERT INTO subreddit
+  (name, description, createdAt, updatedAt) 
+  VALUES (?, ?, ?, ?)
+`;
 var selectUserId = `
   SELECT id, username, createdAt, updatedAt
   FROM users
   WHERE id = ?
 `;
 var selectPostId = `
-  SELECT id,title,url,userId, createdAt, updatedAt 
+  SELECT id, title, url, userId, createdAt, updatedAt 
   FROM posts 
+  WHERE id = ?
+`;
+var selectSubId = `
+  SELECT id, name, description, createdAt, updatedAt
+  FROM subreddit
   WHERE id = ?
 `;
 var selectAllPosts = `
@@ -35,6 +45,16 @@ var selectAllPosts = `
   ON (users.id = posts.userId)
   ORDER BY posts.createdAt DESC
   LIMIT ? OFFSET ?
+`;
+var selectAllSubs = `
+  SELECT
+    subreddit.id AS "subID",
+    subreddit.name AS "subName",
+    subreddit.description AS "subDescription",
+    subreddit.createdAt AS "subCreated",
+    subreddit.updatedAt AS "subUpdated"
+  FROM subreddit
+  ORDER BY subCreated DESC
 `;
 var selectAllPostsForUser = `
     SELECT
@@ -111,6 +131,19 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+    createSubreddit: function createSubreddit(sub) {
+      return connQuery(insertSub, [sub.name, sub.description, new Date(), new Date()])
+      .then(function(result) {
+
+        return connQuery(selectSubId, [result.insertId])
+      })
+      .then(function(result) {
+        return result[0];
+      })
+      .catch(function(error) {
+        throw new Error(error);
+      })
+    },
     getAllPosts: function getAllPosts(options) {
       if (!options) {
         options = {};
@@ -133,6 +166,23 @@ module.exports = function RedditAPI(conn) {
               'UpdatedAt': data.userUpdatedAt
             }
           }          
+        })
+      })
+      .catch(function(error) {
+        throw new Error(error);
+      })
+    },
+    getAllSubreddit: function getAllSubreddit() {
+      return connQuery(selectAllSubs)
+      .then(function(result) {
+        return result.map(function(data) {
+          return {
+            'SubID': data.subID,
+            'SubName': data.subName,
+            'SubDescription': data.subDescription,
+            'CreatedAt': data.subCreated,
+            'UpdatedAt': data.subUpdated
+          }
         })
       })
       .catch(function(error) {

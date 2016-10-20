@@ -33,8 +33,34 @@ function newUserAndpost() {
   connection.end();
 }
 
+function newSub() {
+  redditAPI.createSubreddit({
+    name: 'pics5',
+    // description: 'This was for beautiful pics but now it is for every pics that will get you some karma',
+  })
+  .then(function(result) {
+    console.log(result);
+    connection.end();
+  })
+  .catch(function(error) {
+    console.log(error);
+    connection.end();
+  })
+}
+
 function allPosts() {
   redditAPI.getAllPosts()
+  .then(function(result) {
+    console.log(result);
+  })
+  .catch(function(error) {
+    console.log(error);
+  })
+  connection.end();
+}
+
+function allSubs() {
+  redditAPI.getAllSubreddit()
   .then(function(result) {
     console.log(result);
   })
@@ -70,4 +96,6 @@ function singlePost(postId) {
 // newUserAndpost();
 // allPosts();
 // allPostsForUser(13);
-singlePost(3);
+// singlePost(3);
+// newSub();
+allSubs();

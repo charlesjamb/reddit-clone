@@ -28,8 +28,14 @@ CREATE TABLE `posts` (
 CREATE TABLE `subreddit` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(30) NOT NULL,
+  `description` VARCHAR(200) DEFAULT NULL,
   `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 );
+
+-- Adding a subreddit columns to posts
+ALTER TABLE `posts`
+ADD COLUMN `subredditId` INT,
+ADD FOREIGN KEY (subredditId) REFERENCES subreddit(id);
