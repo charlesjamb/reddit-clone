@@ -12,7 +12,7 @@ var redditAPI = reddit(connection);
 
 function newUserAndpost() {
   redditAPI.createUser({
-    username: 'hello6',
+    username: 'hello7',
     password: 'xxxx'
     })
   .then(function(user) {
@@ -30,6 +30,7 @@ function newUserAndpost() {
   .catch(function(error) {
     console.log(error);
   })
+  connection.end();
 }
 
 function allPosts() {
@@ -40,7 +41,33 @@ function allPosts() {
   .catch(function(error) {
     console.log(error);
   })
+  connection.end();
 }
 
-newUserAndpost();
-allPosts();
+function allPostsForUser(userId) {
+  redditAPI.getAllPostsForUser(userId)
+  .then(function(result) {
+    console.log(result);
+  })
+  .catch(function(error) {
+    console.log(error);
+  })
+  connection.end();
+}
+
+function singlePost(postId) {
+  redditAPI.getSinglePost(postId)
+  .then(function(result) {
+    console.log(result);
+  })
+  .catch(function(error) {
+    console.log(error);
+  })
+  connection.end();
+}
+
+
+// newUserAndpost();
+// allPosts();
+// allPostsForUser(13);
+singlePost(3);
