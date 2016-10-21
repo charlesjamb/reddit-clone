@@ -30,29 +30,36 @@ var selectSubId = `
   FROM subreddit
   WHERE id = ?
 `;
-var selectAllPosts = `
-  SELECT
-    posts.id AS "postID", 
-    posts.title AS "postTitle", 
-    posts.url AS "postUrl", 
-    posts.userId AS "postUser", 
-    users.id AS "userID", 
-    users.username AS "username", 
-    users.createdAt AS "userCreatedAt", 
-    users.updatedAt AS "userUpdatedAt",
-    subreddit.id AS "subID",
-    subreddit.name AS "subName",
-    subreddit.description AS "subDescription",
-    subreddit.createdAt AS "subCreated",
-    subreddit.updatedAt AS "subUpdated"
-  FROM posts
-  JOIN users
-  ON (users.id = posts.userId)
-  JOIN subreddit
-  ON (subreddit.id = posts.subredditId)
-  ORDER BY posts.createdAt DESC
-  LIMIT ? OFFSET ?
-`;
+function allPostsQuery(rank) { 
+  return  `
+    SELECT
+      posts.id AS "postID", 
+      posts.title AS "postTitle", 
+      posts.url AS "postUrl", 
+      posts.userId AS "postUser", 
+      users.id AS "userID",
+      posts.createdAt,
+      users.username AS "username", 
+      users.createdAt AS "userCreatedAt", 
+      users.updatedAt AS "userUpdatedAt",
+      subreddit.id AS "subID",
+      subreddit.name AS "subName",
+      subreddit.description AS "subDescription",
+      subreddit.createdAt AS "subCreated",
+      subreddit.updatedAt AS "subUpdated",
+      SUM(votes.vote) AS "voteScore"
+    FROM posts
+    JOIN users 
+      ON (users.id = posts.userId)
+    JOIN subreddit
+      ON (subreddit.id = posts.subredditId)
+    LEFT JOIN votes 
+      ON (posts.id = votes.postId)
+    GROUP BY posts.id
+    ORDER BY `  +rank+
+    `LIMIT ? OFFSET ?
+  `;
+}
 var selectAllSubs = `
   SELECT
     subreddit.id AS "subID",
@@ -75,7 +82,7 @@ var selectAllPostsForUser = `
     users.updatedAt AS "userUpdatedAt"
   FROM posts
   JOIN users 
-  ON (users.id = posts.userId)
+    ON (users.id = posts.userId)
   WHERE userID = ?
   ORDER BY posts.createdAt DESC
   LIMIT ? OFFSET ?
@@ -95,6 +102,19 @@ var selectSinglePost = `
   ON (users.id = posts.userId)
   WHERE posts.id = ?
   LIMIT 1
+`;
+var voteQuery = `
+  INSERT INTO votes 
+  SET postId=?, userId=?, vote=? 
+  ON DUPLICATE KEY UPDATE vote=?;
+`;
+var getVote = `
+  SELECT
+    postId,
+    userId, 
+    vote
+  FROM votes  
+  WHERE postId = ?
 `;
 
 module.exports = function RedditAPI(conn) {
@@ -149,14 +169,22 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
-    getAllPosts: function getAllPosts(options) {
+    getAllPosts: function getAllPosts(ranking, options) {
       if (!options) {
         options = {};
       }
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
 
-      return connQuery(selectAllPosts, [limit, offset])
+      var rank = 'posts.createdAt DESC ';
+      if (ranking === 'top') {
+        var rank = 'voteScore DESC ';
+      }
+      // else if (ranking = 'hot') {
+      //   var rank = 
+      // }
+      var query = allPostsQuery(rank);
+      return connQuery(query, [limit, offset])
       .then(function(result) {
         return result.map(function(data) {
           return {
@@ -164,6 +192,7 @@ module.exports = function RedditAPI(conn) {
             'PostTitle': data.postTitle,
             'PostURL': data.postUrl,
             'PostUserID': data.postUser,
+            'PostScore': data.voteScore,
             'User': {
               'UserID': data.userID,
               'Username': data.username,
@@ -249,6 +278,23 @@ module.exports = function RedditAPI(conn) {
       .catch(function(error) {
         throw new Error(error);
       })
+    },
+    createVote: function createVote(vote) {
+      if (vote.vote === -1 || vote.vote === 0 || vote.vote === 1) { 
+
+        return connQuery(voteQuery, [vote.postId, vote.userId, vote.vote, vote.vote])
+        .then(function(result) {
+
+          return connQuery(getVote, [vote.postId])
+        })
+        .then(function(result) {
+        return result; 
+        })
+        .catch(function(error) {
+        throw new Error(error);
+        })
+      }
+      else {throw new Error('invalid vote')}
     }
   }
 }

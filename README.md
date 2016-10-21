@@ -223,7 +223,6 @@ Add a `SUM` on the `vote` column of the `votes` table, and give it an alias of `
 
 Then start implementing each sorting method as you see fit, changing the `ORDER BY` clause of your query.
 
-
 ### CHALLENGE: Add comments functionality
 This feature will be complicated to implement because it will require not only adding new code, but also
 modifying existing code and databases. For this reason the steps are outlined in detail.

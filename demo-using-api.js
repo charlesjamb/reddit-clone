@@ -26,7 +26,7 @@ function newUserAndpost() {
     })
   })
   .then(function(post) {
-    console.log(post);
+    console.log(JSON.stringify(result, null, 4));
     connection.end();
   })
   .catch(function(error) {
@@ -41,7 +41,7 @@ function newSub() {
     // description: 'This was for beautiful pics but now it is for every pics that will get you some karma',
   })
   .then(function(result) {
-    console.log(result);
+    console.log(JSON.stringify(result, null, 4));
     connection.end();
   })
   .catch(function(error) {
@@ -50,10 +50,10 @@ function newSub() {
   })
 }
 
-function allPosts() {
-  redditAPI.getAllPosts()
+function allPosts(ranking) {
+  redditAPI.getAllPosts(ranking)
   .then(function(result) {
-    console.log(result);
+    console.log(JSON.stringify(result, null, 4));
     connection.end();
   })
   .catch(function(error) {
@@ -65,7 +65,7 @@ function allPosts() {
 function allSubs() {
   redditAPI.getAllSubreddit()
   .then(function(result) {
-    console.log(result);
+    console.log(JSON.stringify(result, null, 4));
     connection.end();
   })
   .catch(function(error) {
@@ -77,7 +77,7 @@ function allSubs() {
 function allPostsForUser(userId) {
   redditAPI.getAllPostsForUser(userId)
   .then(function(result) {
-    console.log(result);
+    console.log(JSON.stringify(result, null, 4));
     connection.end();
   })
   .catch(function(error) {
@@ -89,7 +89,7 @@ function allPostsForUser(userId) {
 function singlePost(postId) {
   redditAPI.getSinglePost(postId)
   .then(function(result) {
-    console.log(result);
+    console.log(JSON.stringify(result, null, 4));
     connection.end();
   })
   .catch(function(error) {
@@ -98,6 +98,23 @@ function singlePost(postId) {
   })
 }
 
+function voted() {
+  redditAPI.createVote({
+    postId: 3,
+    userId: 3,
+    vote: 1
+  })
+  .then(function(result) {
+    console.log(JSON.stringify(result, null, 4));
+    connection.end();
+  })
+  .catch(function(error) {
+    console.log(error);
+    connection.end();
+  })
+}
+
+// TODO add subreddit to all functions
 
 // newUserAndpost();
 allPosts();
@@ -105,3 +122,4 @@ allPosts();
 // singlePost(3);
 // newSub();
 // allSubs();
+// voted();
