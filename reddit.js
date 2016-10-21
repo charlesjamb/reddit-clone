@@ -7,8 +7,8 @@ var insertUser = `
 `;
 var insertPost = `
   INSERT INTO posts 
-  (userId, title, url, createdAt, updatedAt) 
-  VALUES (?, ?, ?, ?, ?)
+  (userId, title, url, createdAt, updatedAt, subredditId) 
+  VALUES (?, ?, ?, ?, ?, ?)
 `;
 var insertSub = `
   INSERT INTO subreddit
@@ -21,7 +21,7 @@ var selectUserId = `
   WHERE id = ?
 `;
 var selectPostId = `
-  SELECT id, title, url, userId, createdAt, updatedAt 
+  SELECT id, title, url, userId, createdAt, updatedAt, subredditId 
   FROM posts 
   WHERE id = ?
 `;
@@ -39,10 +39,17 @@ var selectAllPosts = `
     users.id AS "userID", 
     users.username AS "username", 
     users.createdAt AS "userCreatedAt", 
-    users.updatedAt AS "userUpdatedAt"
+    users.updatedAt AS "userUpdatedAt",
+    subreddit.id AS "subID",
+    subreddit.name AS "subName",
+    subreddit.description AS "subDescription",
+    subreddit.createdAt AS "subCreated",
+    subreddit.updatedAt AS "subUpdated"
   FROM posts
-  JOIN users 
+  JOIN users
   ON (users.id = posts.userId)
+  JOIN subreddit
+  ON (subreddit.id = posts.subredditId)
   ORDER BY posts.createdAt DESC
   LIMIT ? OFFSET ?
 `;
@@ -91,9 +98,7 @@ var selectSinglePost = `
 `;
 
 module.exports = function RedditAPI(conn) {
-
   var connQuery = core.makeConnQuery(conn);
-
   return {
     createUser: function createUser(user) {
       return core.crypt(user.password, HASH_ROUNDS)
@@ -119,7 +124,7 @@ module.exports = function RedditAPI(conn) {
       })
     },
     createPost: function createPost(post) {
-      return connQuery(insertPost, [post.userId, post.title, post.url, new Date(), new Date()])
+      return connQuery(insertPost, [post.userId, post.title, post.url, new Date(), new Date(), post.subredditId])
       .then(function(result) {
 
         return connQuery(selectPostId, [result.insertId])
@@ -164,6 +169,13 @@ module.exports = function RedditAPI(conn) {
               'Username': data.username,
               'CreatedAt': data.userCreatedAt,
               'UpdatedAt': data.userUpdatedAt
+            },
+            'Subreddit': {
+              'SubID': data.subID,
+              'SubName': data.subName,
+              'SubDescription': data.subDescription,
+              'subCreated' : data.subCreated,
+              'subUpdated': data.subUpdated
             }
           }          
         })

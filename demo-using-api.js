@@ -12,7 +12,7 @@ var redditAPI = reddit(connection);
 
 function newUserAndpost() {
   redditAPI.createUser({
-    username: 'hello7',
+    username: 'A wild user appear44',
     password: 'xxxx'
     })
   .then(function(user) {
@@ -21,16 +21,18 @@ function newUserAndpost() {
     return redditAPI.createPost({
       title: 'hi reddit',
       url: 'https://reddit.com',
+      subredditId: '1',
       userId: user.id
     })
   })
   .then(function(post) {
     console.log(post);
+    connection.end();
   })
   .catch(function(error) {
     console.log(error);
+    connection.end();
   })
-  connection.end();
 }
 
 function newSub() {
@@ -52,50 +54,54 @@ function allPosts() {
   redditAPI.getAllPosts()
   .then(function(result) {
     console.log(result);
+    connection.end();
   })
   .catch(function(error) {
     console.log(error);
+    connection.end();
   })
-  connection.end();
 }
 
 function allSubs() {
   redditAPI.getAllSubreddit()
   .then(function(result) {
     console.log(result);
+    connection.end();
   })
   .catch(function(error) {
     console.log(error);
+    connection.end();
   })
-  connection.end();
 }
 
 function allPostsForUser(userId) {
   redditAPI.getAllPostsForUser(userId)
   .then(function(result) {
     console.log(result);
+    connection.end();
   })
   .catch(function(error) {
     console.log(error);
+    connection.end();
   })
-  connection.end();
 }
 
 function singlePost(postId) {
   redditAPI.getSinglePost(postId)
   .then(function(result) {
     console.log(result);
+    connection.end();
   })
   .catch(function(error) {
     console.log(error);
+    connection.end();
   })
-  connection.end();
 }
 
 
 // newUserAndpost();
-// allPosts();
+allPosts();
 // allPostsForUser(13);
 // singlePost(3);
 // newSub();
-allSubs();
+// allSubs();
