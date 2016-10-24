@@ -1,6 +1,18 @@
 var express = require('express');
 var app = express();
 
+var mysql = require('mysql');
+
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : 'sqltemppassword',
+  database : 'reddit'
+});
+
+var reddit = require('./reddit.js');
+var redditAPI = reddit(connection);
+
 app.get('/', function (req, res) {
 	res.send('Hello World!');
 });
@@ -39,6 +51,31 @@ app.get('/calculator/:operation', function(req, res) {
 		res.sendStatus(400);	
 	}
 	res.send(JSON.stringify(theCalculator, null, 4));
+});
+
+app.get('/posts/', function(req, res) {
+
+	redditAPI.getAllPosts('new', {'numPerPage': 5, 'page': 0})
+		.then(function(result) {
+
+			var HTML = `<div id="contents">
+  						<h1>List of contents</h1>
+  						<ul class="contents-list">`;
+  			result.forEach(function(post) {
+  				HTML += `<li class="content-item">
+						<h2 class="content-item__title">
+							<a href=${post.PostURL}>${post.PostTitle}</a>
+						</h2>
+							<p>Created by ${post.User.Username}</p>
+							</li>` 
+  			})
+
+  			res.send(HTML);
+		})
+		.catch(function(err) {
+			console.log(err)
+		})
+
 });
 
 

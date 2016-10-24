@@ -176,13 +176,15 @@ module.exports = function RedditAPI(conn) {
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
 
-      var rank = 'posts.createdAt DESC ';
       if (ranking === 'top') {
         var rank = 'voteScore DESC ';
       }
       // else if (ranking = 'hot') {
       //   var rank = 
       // }
+      else {
+        var rank = 'posts.createdAt DESC ';
+      }
       var query = allPostsQuery(rank);
       return connQuery(query, [limit, offset])
       .then(function(result) {
