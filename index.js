@@ -1,6 +1,6 @@
 var express = require('express');
-var app = express();
-
+var reddit = require('./reddit.js');
+var bodyParser = require('body-parser')
 var mysql = require('mysql');
 
 var connection = mysql.createConnection({
@@ -9,8 +9,7 @@ var connection = mysql.createConnection({
   password : 'sqltemppassword',
   database : 'reddit'
 });
-
-var reddit = require('./reddit.js');
+var app = express();
 var redditAPI = reddit(connection);
 
 app.get('/', function (req, res) {
@@ -58,24 +57,43 @@ app.get('/posts/', function(req, res) {
 	redditAPI.getAllPosts('new', {'numPerPage': 5, 'page': 0})
 		.then(function(result) {
 
-			var HTML = `<div id="contents">
-  						<h1>List of contents</h1>
-  						<ul class="contents-list">`;
+			var HTML = `
+				<div id="contents">
+  					<h1>List of contents</h1>
+  					<ul class="contents-list">`;
   			result.forEach(function(post) {
-  				HTML += `<li class="content-item">
-						<h2 class="content-item__title">
-							<a href=${post.PostURL}>${post.PostTitle}</a>
-						</h2>
-							<p>Created by ${post.User.Username}</p>
-							</li>` 
-  			})
+  				HTML += `
+  				<li class="content-item">
+					<h2 class="content-item__title">
+						<a href=${post.PostURL}>${post.PostTitle}</a>
+					</h2>
+					<p>Created by ${post.User.Username}</p>
+				</li> 
+  			`});
+  			var endHTML = `
+  				 	</ul>
+				</div>`;
 
-  			res.send(HTML);
+  			res.send(HTML + endHTML);
 		})
 		.catch(function(err) {
 			console.log(err)
 		})
 
+});
+
+app.get('/createContent/', function(req, res) {
+	res.send(`
+		<form action="/createContent" method="POST"> <!-- what is this method="POST" thing? you should know, or ask me :) -->
+			<div>
+				<input type="text" name="url" placeholder="Enter a URL to content">
+			</div>
+			<div>
+				<input type="text" name="title" placeholder="Enter the title of your content">
+			</div>
+			<button type="submit">Create!</button>
+		</form>
+	`)
 });
 
 
