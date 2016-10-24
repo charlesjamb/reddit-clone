@@ -6,7 +6,9 @@ app.get('/', function (req, res) {
 });
 
 app.get('/hello', function(req, res) {
-	res.send('<h1>Hello World</h1>');
+	// console.log(req.query);
+
+	res.send('Hello ' + req.query.name);
 });
 
 
