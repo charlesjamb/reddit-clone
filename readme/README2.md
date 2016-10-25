@@ -135,7 +135,7 @@ Here are the steps to follow:
       input(type="text", name="title", placeholder="Enter the title of your content")
     button(type="submit") Create!
   ```
-  6. Notice how the Pug code is much shorter than its HTML counterpart? This is because Pug uses indentation rather than opening and closing tags. This template actually has no dynamic parts to it, but it's still nicer to write it than the HTML document, and it's separated from the web server code!
+  6. Notice how the Pug code is much shorter than its HTML counterpart? This is because Pug uses indentation rather than opening and closing tags. This template actually has no dynamic parts to it, but it's still nicer to write it than the HTML document, and it's separated from the web server code! 
   7. In your `app.get('/createContent')` code, remove all the HTML you created, as well as the `res.send`. Replace them with the following single line of code:
 
   ```js

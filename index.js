@@ -9,30 +9,30 @@ var connection = mysql.createConnection({
   password : 'sqltemppassword',
   database : 'reddit'
 });
+
 var app = express();
 var redditAPI = reddit(connection);
 
+app.set('view engine', 'pug');
+
 app.get('/', function (req, res) {
-	res.send('Hello World!');
+	res.send('<h1>Hello World!</h1>');
 });
 
 app.get('/hello', function(req, res) {
-	// console.log(req.query);
-
-	res.send('Hello ' + req.query.name);
+	res.send(`<h1>Hello ${req.query.name || 'World'}!</h1>`);
 });
 
 app.get('/hello/:name', function(req, res) {
-	res.send('Hello ' + req.params.name);
+	res.send(`<h1>Hello ${req.params.name}!</h1>`);
 });
 
 app.get('/calculator/:operation', function(req, res) {
 	var theCalculator = {
 		'operator': req.params.operation,
-		'firstOperand': parseInt(req.query.num1),
-		'secondOperand': parseInt(req.query.num2)
+		'firstOperand': Number(req.query.num1),
+		'secondOperand': Number(req.query.num2)
 	};
-
 	switch(theCalculator.operator) {
 		case 'add':
 			theCalculator.solution = theCalculator.firstOperand + theCalculator.secondOperand;
@@ -47,54 +47,52 @@ app.get('/calculator/:operation', function(req, res) {
 			theCalculator.solution = theCalculator.firstOperand / theCalculator.secondOperand;
 			break;
 		default:
-		res.sendStatus(400);	
+		res.status(400).send('Please use a valid operator, add or sub or mult or div.');	
 	}
-	res.send(JSON.stringify(theCalculator, null, 4));
+	res.send(theCalculator);
 });
 
 app.get('/posts/', function(req, res) {
-
-	redditAPI.getAllPosts('new', {'numPerPage': 5, 'page': 0})
-		.then(function(result) {
-
-			var HTML = `
-				<div id="contents">
-  					<h1>List of contents</h1>
-  					<ul class="contents-list">`;
-  			result.forEach(function(post) {
-  				HTML += `
-  				<li class="content-item">
-					<h2 class="content-item__title">
-						<a href=${post.PostURL}>${post.PostTitle}</a>
-					</h2>
-					<p>Created by ${post.User.Username}</p>
-				</li> 
-  			`});
-  			var endHTML = `
-  				 	</ul>
-				</div>`;
-
-  			res.send(HTML + endHTML);
-		})
-		.catch(function(err) {
-			console.log(err)
-		})
-
+	redditAPI.getAllPosts('new', {numPerPage: 5, page: 0})
+	.then(function(result) {
+		var HTML = `
+			<div id="contents">
+				<h1>List of contents</h1>
+				<ul class="contents-list">`;
+		result.forEach(function(post) {
+			HTML += `
+			<li class="content-item">
+				<h2 class="content-item__title">
+					<a href=${post.PostURL}>${post.PostTitle}</a>
+				</h2>
+				<p>Created by ${post.User.Username}</p>
+			</li>
+			`});
+		var endHTML = `
+			 	</ul>
+			</div>`;
+		res.send(HTML + endHTML);
+	})
+	.catch(function(err) {
+		res.status(500).send(`${err}. Ooops something went wrong, pls come back later`);
+	})
 });
 
-app.get('/createContent/', function(req, res) {
-	res.send(`
-		<form action="/createContent" method="POST"> <!-- what is this method="POST" thing? you should know, or ask me :) -->
-			<div>
-				<input type="text" name="url" placeholder="Enter a URL to content">
-			</div>
-			<div>
-				<input type="text" name="title" placeholder="Enter the title of your content">
-			</div>
-			<button type="submit">Create!</button>
-		</form>
-	`)
+app.get('/createContent', function(req, res) {
+	res.render('create-content')
 });
+
+app.use(bodyParser.urlencoded());
+
+app.post('/createContent', function(req, res) {
+	redditAPI.createPost({'userId': 1, 'title': req.body.title, 'url': req.body.url, 'subredditId': 1 })
+	.then(function(result) {
+		res.redirect('/posts/');
+	})
+	.catch(function(err) {
+		res.status(500).send(`${err}. Ooops something went wrong, pls come back later`);
+	})
+})
 
 
 /* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
