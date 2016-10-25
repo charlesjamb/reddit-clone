@@ -1,14 +1,14 @@
-var mysql = require('mysql');
+const mysql = require('mysql');
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
   password : 'sqltemppassword',
   database : 'reddit'
 });
 
-var reddit = require('./reddit.js');
-var redditAPI = reddit(connection);
+const reddit = require('./reddit.js');
+const redditAPI = reddit(connection);
 
 function newUserAndpost() {
   redditAPI.createUser({

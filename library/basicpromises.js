@@ -1,8 +1,8 @@
-var request = require('request');
-var prompt = require('prompt');
-var mysql = require('mysql');
-var bcrypt = require('bcrypt');
-var HASH_ROUNDS = 10;
+const request = require('request');
+const prompt = require('prompt');
+const mysql = require('mysql');
+const bcrypt = require('bcrypt');
+const HASH_ROUNDS = 10;
 
 // hash a password with bcrypt
 function crypt(password, HASH_ROUNDS) {
