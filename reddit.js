@@ -198,6 +198,9 @@ module.exports = function RedditAPI(conn) {
       if (ranking === 'top') {
         var rank = 'voteScore DESC ';
       }
+      else if (ranking === 'hot') {
+        var rank = 'sum(votes.vote) / (current_timestamp - posts.createdAt)';
+      }
       else {
         var rank = 'posts.createdAt DESC ';
       }

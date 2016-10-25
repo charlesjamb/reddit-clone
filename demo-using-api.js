@@ -114,8 +114,8 @@ function voted() {
 
 // TODO add subreddit to all functions
 
-newUserAndpost();
-// allPosts();
+// newUserAndpost();
+allPosts('hot');
 // allPostsForUser(1);
 // singlePost(23);
 // newSub();
