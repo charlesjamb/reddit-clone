@@ -118,8 +118,8 @@ function voted() {
 
 // newUserAndpost();
 // allPosts();
-allPostsForUser(1);
-// singlePost(3);
+// allPostsForUser(1);
+singlePost(23);
 // newSub();
 // allSubs();
 // voted();

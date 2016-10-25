@@ -101,15 +101,24 @@ const selectSinglePost = `
   SELECT
     posts.id AS "postId", 
     posts.title AS "postTitle", 
-    posts.url AS "postUrl", 
+    posts.url AS "postUrl",
+    posts.createdAt AS "postCreatedAt",
+    posts.updatedAt AS "postUpdatedAt",
     posts.userId AS "postUser", 
     users.id AS "userId", 
     users.username AS "username", 
     users.createdAt AS "userCreatedAt", 
-    users.updatedAt AS "userUpdatedAt"
+    users.updatedAt AS "userUpdatedAt",
+    subreddit.id AS "subId",
+    subreddit.name AS "subName",
+    subreddit.description AS "subDescription",
+    subreddit.createdAt AS "subCreatedAt",
+    subreddit.updatedAt AS "subUpdatedAt"
   FROM posts
   JOIN users 
-  ON (users.id = posts.userId)
+    ON (users.id = posts.userId)
+  JOIN subreddit
+    ON (subreddit.id = posts.subredditId)
   WHERE posts.id = ?
   LIMIT 1
 `;
@@ -281,19 +290,27 @@ module.exports = function RedditAPI(conn) {
     getSinglePost: function getSinglePost(postId) {
       return connQuery(selectSinglePost, postId)
       .then(function(data) {
-        var singlePostObj = {
+        return {
           'postId': data[0].postId,
           'postTitle': data[0].postTitle,
           'postUrl': data[0].postUrl,
+          'postCreatedAt': data[0].postCreatedAt,
+          'postUpdatedAt': data[0].postUpdatedAt,
           'postUserId': data[0].postUser,
           'user': {
             'userId': data[0].userId,
             'username': data[0].username,
             'createdAt': data[0].userCreatedAt,
             'updatedAt': data[0].userUpdatedAt
+          },
+          'subreddit': {
+            'subId': data[0].subId,
+            'subName': data[0].subName,
+            'subDescription': data[0].subDescription,
+            'subCreatedAt' : data[0].subCreatedAt,
+            'subUpdatedAt': data[0].subUpdatedAt
           }
         }
-        return singlePostObj;
       })
       .catch(function(error) {
         throw new Error(error);
