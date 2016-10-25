@@ -52,29 +52,13 @@ app.get('/calculator/:operation', function(req, res) {
 	res.send(theCalculator);
 });
 
-app.get('/posts/', function(req, res) {
+app.get('/posts', function(req, res) {
 	redditAPI.getAllPosts('new', {numPerPage: 5, page: 0})
-	.then(function(result) {
-		var HTML = `
-			<div id="contents">
-				<h1>List of contents</h1>
-				<ul class="contents-list">`;
-		result.forEach(function(post) {
-			HTML += `
-			<li class="content-item">
-				<h2 class="content-item__title">
-					<a href=${post.PostURL}>${post.PostTitle}</a>
-				</h2>
-				<p>Created by ${post.User.Username}</p>
-			</li>
-			`});
-		var endHTML = `
-			 	</ul>
-			</div>`;
-		res.send(HTML + endHTML);
+	.then(function(posts) {
+		res.render('post-list', {posts: posts});
 	})
 	.catch(function(err) {
-		res.status(500).send(`${err}. Ooops something went wrong, pls come back later`);
+		res.status(500).send(`${err}`);
 	})
 });
 
@@ -87,10 +71,10 @@ app.use(bodyParser.urlencoded());
 app.post('/createContent', function(req, res) {
 	redditAPI.createPost({'userId': 1, 'title': req.body.title, 'url': req.body.url, 'subredditId': 1 })
 	.then(function(result) {
-		res.redirect('/posts/');
+		res.redirect('/posts');
 	})
 	.catch(function(err) {
-		res.status(500).send(`${err}. Ooops something went wrong, pls come back later`);
+		res.status(500).send(`${err}`);
 	})
 })
 
