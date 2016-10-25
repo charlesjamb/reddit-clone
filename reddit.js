@@ -76,14 +76,23 @@ const selectAllPostsForUser = `
     posts.id AS "postId", 
     posts.title AS "postTitle", 
     posts.url AS "postUrl", 
-    posts.userId AS "postUser", 
+    posts.userId AS "postUser",
+    posts.createdAt AS "postCreatedAt",
+    posts.updatedAt AS "postUpdatedAt",
     users.id AS "userId", 
     users.username AS "username", 
     users.createdAt AS "userCreatedAt", 
-    users.updatedAt AS "userUpdatedAt"
+    users.updatedAt AS "userUpdatedAt",
+    subreddit.id AS "subId",
+    subreddit.name AS "subName",
+    subreddit.description AS "subDescription",
+    subreddit.createdAt AS "subCreatedAt",
+    subreddit.updatedAt AS "subUpdatedAt"
   FROM posts
   JOIN users 
     ON (users.id = posts.userId)
+  JOIN subreddit
+    ON (subreddit.id = posts.subredditId)
   WHERE userId = ?
   ORDER BY posts.createdAt DESC
   LIMIT ? OFFSET ?
@@ -246,12 +255,21 @@ module.exports = function RedditAPI(conn) {
             'postId': data.postId,
             'postTitle': data.postTitle,
             'postUrl': data.postUrl,
+            'postCreatedAt': data.postCreatedAt,
+            'postUpdatedAt': data.postUpdatedAt,
             'postUserId': data.postUser,
             'user': {
               'userID': data.userId,
               'username': data.username,
               'createdAt': data.userCreatedAt,
               'updatedAt': data.userUpdatedAt
+            },
+            'subreddit': {
+              'subId': data.subId,
+              'subName': data.subName,
+              'subDescription': data.subDescription,
+              'subCreatedAt' : data.subCreatedAt,
+              'subUpdatedAt': data.subUpdatedAt
             }
           }
         }) 
