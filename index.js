@@ -1,17 +1,17 @@
-var express = require('express');
-var reddit = require('./reddit.js');
-var bodyParser = require('body-parser')
-var mysql = require('mysql');
+const express = require('express');
+const reddit = require('./reddit.js');
+const bodyParser = require('body-parser')
+const mysql = require('mysql');
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
   password : 'sqltemppassword',
   database : 'reddit'
 });
 
-var app = express();
-var redditAPI = reddit(connection);
+const app = express();
+const redditAPI = reddit(connection);
 
 app.set('view engine', 'pug');
 
