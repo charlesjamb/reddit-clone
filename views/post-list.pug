@@ -1,8 +1,11 @@
-form(action="/posts", method="POST")
+extends layout.pug
+
+block content
+	form(action="/posts", method="POST")
 	div(id="contents")
 		h1 List of contents
 		ul
-			each val in posts 
+			each val in posts
 				li 
 					content-item_title
 					h2

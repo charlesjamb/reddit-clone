@@ -152,7 +152,7 @@ Here are the steps to follow:
     3. In your views directory, create a file called `post-list.pug` and try to recreate the same output as you did with HTML. You will have access to a variable called `posts`, that will have been transmitted by the call to `render`. You will need to use the `each` functionality of Pug to do this.
 
 ## Exercise 8: Layouts
-This exrcise expands on the previous one. In the previous exercise, we saw how to generate dynamic HTML by using a template engine. This is great, but normally we have to send a **full HTML page** rather than a part of a page.
+This exercise expands on the previous one. In the previous exercise, we saw how to generate dynamic HTML by using a template engine. This is great, but normally we have to send a **full HTML page** rather than a part of a page.
 
 Pug lets us do this using [inheritance](https://pugjs.org/language/inheritance.html). We start by defining a "layout", which is simply a template with some placeholders. Then, when we render our main template -- the one you created in the previous exercise -- we specify how the placeholders should be filled in.
 
