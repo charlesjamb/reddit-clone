@@ -69,7 +69,7 @@ const selectAllSubs = `
     subreddit.createdAt AS "subCreatedAt",
     subreddit.updatedAt AS "subUpdatedAt"
   FROM subreddit
-  ORDER BY subCreated DESC
+  ORDER BY subCreatedAt DESC
 `;
 const selectAllPostsForUser = `
     SELECT
@@ -241,8 +241,8 @@ module.exports = function RedditAPI(conn) {
             'subId': data.subId,
             'subName': data.subName,
             'subDescription': data.subDescription,
-            'createdAt': data.subCreatedAt,
-            'updatedAt': data.subUpdatedAt
+            'subCreatedAt': data.subCreatedAt,
+            'subUpdatedAt': data.subUpdatedAt
           }
         })
       })

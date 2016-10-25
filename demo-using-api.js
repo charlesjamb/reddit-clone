@@ -12,21 +12,19 @@ const redditAPI = reddit(connection);
 
 function newUserAndpost() {
   redditAPI.createUser({
-    username: 'A wild user appear44',
+    username: 'A wild user appear46',
     password: 'xxxx'
     })
   .then(function(user) {
-    console.log(user);
-
     return redditAPI.createPost({
-      title: 'hi reddit',
-      url: 'https://reddit.com',
-      subredditId: '1',
+      title: 'Another WTF post',
+      url: 'https://example.com',
+      subredditId: '9',
       userId: user.id
     })
   })
   .then(function(post) {
-    console.log(JSON.stringify(result, null, 4));
+    console.log(JSON.stringify(post, null, 4));
     connection.end();
   })
   .catch(function(error) {
@@ -37,8 +35,8 @@ function newUserAndpost() {
 
 function newSub() {
   redditAPI.createSubreddit({
-    name: 'pics5',
-    // description: 'This was for beautiful pics but now it is for every pics that will get you some karma',
+    name: 'WTF',
+    description: 'Some gross and weird stuffs',
   })
   .then(function(result) {
     console.log(JSON.stringify(result, null, 4));
@@ -116,10 +114,10 @@ function voted() {
 
 // TODO add subreddit to all functions
 
-// newUserAndpost();
+newUserAndpost();
 // allPosts();
 // allPostsForUser(1);
-singlePost(23);
+// singlePost(23);
 // newSub();
 // allSubs();
 // voted();
