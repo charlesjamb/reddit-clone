@@ -61,7 +61,7 @@ app.post('/login', function(request, response) {
 });
 
 app.get('/signup', function(request, response) {
-  // code to display signup form
+  response.render('signup-page');
 });
 
 app.post('/signup', function(request, response) {
