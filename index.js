@@ -1,4 +1,3 @@
-
 // Dependencies
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -53,7 +52,7 @@ app.get('/', function(request, response) {
 });
 
 app.get('/login', function(request, response) {
-  // code to display login form
+  response.render('login-page');
 });
 
 app.post('/login', function(request, response) {
