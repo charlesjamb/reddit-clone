@@ -1,92 +1,97 @@
-const express = require('express');
-const reddit = require('./reddit.js');
-const bodyParser = require('body-parser')
-const mysql = require('mysql');
 
-const connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : 'sqltemppassword',
-  database : 'reddit'
-});
+// Dependencies
+const express = require('express');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
 
 const app = express();
-const redditAPI = reddit(connection);
 
+// Specify the usage of the Pug template engine
 app.set('view engine', 'pug');
 
-app.get('/', function (req, res) {
-	res.send('<h1>Hello World!</h1>');
+// Middleware
+// This middleware will parse the POST requests coming from an HTML form, and put the result in req.body.  Read the docs for more info!
+app.use(bodyParser.urlencoded({extended: false}));
+
+// This middleware will parse the Cookie header from all requests, and put the result in req.cookies.  Read the docs for more info!
+app.use(cookieParser());
+
+// This middleware will console.log every request to your web server! Read the docs for more info!
+app.use(morgan('dev'));
+
+/*
+IMPORTANT!!!!!!!!!!!!!!!!!
+Before defining our web resources, we will need access to our RedditAPI functions.
+You will need to write (or copy) the code to create a connection to your MySQL database here, and import the RedditAPI.
+Then, you'll be able to use the API inside your app.get/app.post functions as appropriate.
+*/
+
+
+// Resources
+app.get('/', function(request, response) {
+  /*
+  Your job here will be to use the RedditAPI.getAllPosts function to grab the real list of posts.
+  For now, we are simulating this with a fake array of posts!
+  */
+  var posts = [
+    {
+      id: 123,
+      title: 'Check out this cool site!',
+      url: 'https://www.decodemtl.com/',
+      user: {
+        id: 42,
+        username: 'cool_dude'
+      }
+    },
+    {
+      id: 400,
+      title: 'This is SPARTA!!!',
+      url: 'http://www.SPARTA.com/',
+      user: {
+        id: 222,
+        username: 'Merilize'
+      }
+    }
+  ];
+
+  /*
+  Response.render will call the Pug module to render your final HTML.
+  Check the file views/post-list.pug as well as the README.md to find out more!
+  */
+  response.render('post-list', {posts: posts});
 });
 
-app.get('/hello', function(req, res) {
-	res.send(`<h1>Hello ${req.query.name || 'World'}!</h1>`);
+app.get('/login', function(request, response) {
+  // code to display login form
 });
 
-app.get('/hello/:name', function(req, res) {
-	res.send(`<h1>Hello ${req.params.name}!</h1>`);
+app.post('/login', function(request, response) {
+  // code to login a user
+  // hint: you'll have to use response.cookie here
 });
 
-app.get('/calculator/:operation', function(req, res) {
-	var theCalculator = {
-		'operator': req.params.operation,
-		'firstOperand': Number(req.query.num1),
-		'secondOperand': Number(req.query.num2)
-	};
-	switch(theCalculator.operator) {
-		case 'add':
-			theCalculator.solution = theCalculator.firstOperand + theCalculator.secondOperand;
-			break;
-		case 'sub':
-			theCalculator.solution = theCalculator.firstOperand - theCalculator.secondOperand;
-			break;
-		case 'mult':
-			theCalculator.solution = theCalculator.firstOperand * theCalculator.secondOperand;
-			break;
-		case 'div':
-			theCalculator.solution = theCalculator.firstOperand / theCalculator.secondOperand;
-			break;
-		default:
-		res.status(400).send('Please use a valid operator, add or sub or mult or div.');	
-	}
-	res.send(theCalculator);
+app.get('/signup', function(request, response) {
+  // code to display signup form
 });
 
-app.get('/posts', function(req, res) {
-	redditAPI.getAllPosts('new', {numPerPage: 5, page: 0})
-	.then(function(posts) {
-		res.render('post-list', {posts: posts});
-	})
-	.catch(function(err) {
-		res.status(500).send(`${err}`);
-	})
+app.post('/signup', function(request, response) {
+  // code to signup a user
+  // ihnt: you'll have to use bcrypt to hash the user's password
 });
 
-app.get('/createContent', function(req, res) {
-	res.render('create-content')
+app.post('/vote', function(request, response) {
+  // code to add an up or down vote for a content+user combination
 });
-
-app.use(bodyParser.urlencoded());
-
-app.post('/createContent', function(req, res) {
-	redditAPI.createPost({'userId': 1, 'title': req.body.title, 'url': req.body.url, 'subredditId': 1 })
-	.then(function(result) {
-		res.redirect('/posts');
-	})
-	.catch(function(err) {
-		res.status(500).send(`${err}`);
-	})
-})
-
 
 /* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
 
 // Boilerplate code to start up the web server
-var server = app.listen((process.env.PORT || 3000), (process.env.IP || '127.0.0.1'), function () {
-	var host = server.address().address;
-	var port = server.address().port;
+const server = app.listen((process.env.PORT || 3000), (process.env.IP || '127.0.0.1'), function () {
+  const host = server.address().address;
+  const port = server.address().port;
 
-	console.log('Example app listening at http://%s:%s', host, port);
+  console.log('Web Server is listening at http://%s:%s', host, port);
 });
 
 // On browser
