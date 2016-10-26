@@ -146,7 +146,7 @@ module.exports = function RedditAPI(conn) {
         return connQuery(insertUser, [user.username, hashedPassword, new Date(), new Date()])
       })
       .then(function(result) {
-
+            // return result;
         return connQuery(selectUserId, [result.insertId])
       })
       .then(function(result) {

@@ -65,8 +65,13 @@ app.get('/signup', function(request, response) {
 });
 
 app.post('/signup', function(request, response) {
-  // code to signup a user
-  // ihnt: you'll have to use bcrypt to hash the user's password
+  redditAPI.createUser({'username': request.body.username, 'password': request.body.password})
+  .then(function(result) {
+    response.redirect('/login');
+  })
+  .catch(function(err) {
+    response.status(500).send(`${err}`);
+  })
 });
 
 app.post('/vote', function(request, response) {
