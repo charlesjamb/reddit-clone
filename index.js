@@ -4,6 +4,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const reddit = require('./reddit.js');
+const mysql = require('mysql');
 
 const app = express();
 
@@ -20,46 +22,34 @@ app.use(cookieParser());
 // This middleware will console.log every request to your web server! Read the docs for more info!
 app.use(morgan('dev'));
 
-/*
-IMPORTANT!!!!!!!!!!!!!!!!!
-Before defining our web resources, we will need access to our RedditAPI functions.
-You will need to write (or copy) the code to create a connection to your MySQL database here, and import the RedditAPI.
-Then, you'll be able to use the API inside your app.get/app.post functions as appropriate.
-*/
+// Acces to the database
+const connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : 'sqltemppassword',
+  database : 'reddit'
+});
 
+const redditAPI = reddit(connection);
 
 // Resources
 app.get('/', function(request, response) {
-  /*
-  Your job here will be to use the RedditAPI.getAllPosts function to grab the real list of posts.
-  For now, we are simulating this with a fake array of posts!
-  */
-  var posts = [
-    {
-      id: 123,
-      title: 'Check out this cool site!',
-      url: 'https://www.decodemtl.com/',
-      user: {
-        id: 42,
-        username: 'cool_dude'
-      }
-    },
-    {
-      id: 400,
-      title: 'This is SPARTA!!!',
-      url: 'http://www.SPARTA.com/',
-      user: {
-        id: 222,
-        username: 'Merilize'
-      }
-    }
-  ];
+  var rank;
+  if (request.query.sort === 'new') {
+    rank = 'new';
+  }
+  else if (request.query.sort === 'top') {
+    rank = 'top';
+  }
+  else {rank = 'hot';}
 
-  /*
-  Response.render will call the Pug module to render your final HTML.
-  Check the file views/post-list.pug as well as the README.md to find out more!
-  */
-  response.render('post-list', {posts: posts});
+  redditAPI.getAllPosts(rank, {numPerPage: 25, page: 0})
+  .then(function(posts) {
+    response.render('post-list', {posts: posts});
+  })
+  .catch(function(err) {
+    response.status(500).send(`${err}`);
+  })
 });
 
 app.get('/login', function(request, response) {
