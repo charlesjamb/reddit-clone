@@ -90,7 +90,14 @@ app.post('/vote', function(request, response) {
 });
 
 app.get('/createPost', function(request, response) {
-  response.render('create-content');
+  redditAPI.getAllSubreddit()
+  .then(function(subs) {
+    console.log(subs);
+    response.render('create-content', {subs: subs});
+  })
+  .catch(function(err) {
+    response.send(`${err.stack}`)
+  })
 })
 
 app.post('/createPost', function(request, response) {
@@ -102,7 +109,7 @@ app.post('/createPost', function(request, response) {
       'userId': request.loggedInUser[0].userId,
       'title': request.body.title,
       'url': request.body.url,
-      'subredditId': 1
+      'subredditId': request.body.selectedSub
     })
     .then(function(result) {
       response.redirect('/?sort=new');
