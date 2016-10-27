@@ -47,7 +47,7 @@ app.get('/', function(request, response) {
     response.render('post-list', {posts: posts});
   })
   .catch(function(err) {
-    response.status(500).send(`${err}`);
+    response.status(500).send(`${err.stack}`);
   })
 });
 
@@ -57,11 +57,15 @@ app.get('/login', function(request, response) {
 
 app.post('/login', function(request, response) {
   redditAPI.checkLogin(request.body.username, request.body.password)
-  .then(function(result) {
-    response.send(`${result}`);
+  .then(function(user) {
+    
+    return redditAPI.createSession(user.id)
+    .then(function(token) {
+      response.send(`${token}`);
+    })
   })
   .catch(function(err) {
-    response.send(`${err}`)
+    response.send(`${err.stack}`)
   })
 });
 
@@ -75,7 +79,7 @@ app.post('/signup', function(request, response) {
     response.redirect('/login');
   })
   .catch(function(err) {
-    response.status(500).send(`${err}`);
+    response.status(500).send(`${err.stack}`);
   })
 });
 

@@ -1,4 +1,5 @@
 const core = require('./library/basicpromises.js');
+const secureRandom = require('secure-random');
 const HASH_ROUNDS = 10;
 const insertUser = `
   INSERT INTO users 
@@ -136,8 +137,12 @@ const getVote = `
   WHERE postId = ?
 `;
 
+function createSessionToken() {
+  return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
+}
+
 module.exports = function RedditAPI(conn) {
-  var connQuery = core.makeConnQuery(conn);
+  const connQuery = core.makeConnQuery(conn);
   return {
     createUser: function createUser(user) {
       return core.crypt(user.password, HASH_ROUNDS)
@@ -348,7 +353,12 @@ module.exports = function RedditAPI(conn) {
 
             return core.hashCompare(password, actualHashedPassword)
             .then(function(result){
-              return result;
+              if (result === true) {
+                return user;
+              }
+              else {
+                throw new Error('username or password incorrect');
+              }
             })
             .catch(function(error) {
               throw new Error('username or password incorrect');
@@ -358,6 +368,17 @@ module.exports = function RedditAPI(conn) {
       .catch(function(error) {
         throw new Error(error);
       })
+    },
+    createSession: function createSession(userId) {
+      var token = createSessionToken();
+      return connQuery('INSERT INTO sessions SET userId = ?, token = ?', [userId, token])
+      .then(function(result) {
+        response.cookie('SESSION', token);
+        response.redirect('/login');
+      })
+      .catch(function(error) {
+        throw new Error(error);
+      })
     }
   }
-}
+} 

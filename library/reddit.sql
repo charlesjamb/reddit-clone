@@ -51,3 +51,11 @@ CREATE TABLE `votes` (
   FOREIGN KEY (postId) REFERENCES posts(id),
   FOREIGN KEY (userId) REFERENCES users(id)
 );
+
+-- Adding the sessions table
+CREATE TABLE `sessions` (
+  `userId` INT NOT NULL,
+  `token` VARCHAR(1000),
+  PRIMARY KEY (`token`),
+  FOREIGN KEY (userId) REFERENCES users(id)
+);
