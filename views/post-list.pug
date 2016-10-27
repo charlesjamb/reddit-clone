@@ -4,6 +4,12 @@ block content
 	form(action="/posts", method="POST")
 	div(id="contents")
 		h1 Welcome to Reddit!!
+		p
+			a(href="http://127.0.0.1:3000/?sort=new")="new"
+			br
+			a(href="http://127.0.0.1:3000/?sort=hot")="hot" 
+			br
+			a(href="http://127.0.0.1:3000/?sort=top")="top"
 		ul.post-list
 			each post in posts
 				li.post 
