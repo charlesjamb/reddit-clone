@@ -85,14 +85,9 @@ app.post('/signup', function(request, response) {
   })
 });
 
-app.post('/vote', function(request, response) {
-  // code to add an up or down vote for a content+user combination
-});
-
 app.get('/createPost', function(request, response) {
   redditAPI.getAllSubreddit()
   .then(function(subs) {
-    console.log(subs);
     response.render('create-content', {subs: subs});
   })
   .catch(function(err) {
@@ -116,6 +111,29 @@ app.post('/createPost', function(request, response) {
     })
     .catch(function(err) {
       response.send(`${err.stack}`);
+    })
+  }
+})
+
+
+
+app.post('/vote', function(request, response) {
+  if (!request.loggedInUser) {
+    response.status(401).send('You must be logged in to vote');
+  }
+  else {
+    console.log(request.body);
+    redditAPI.createVote({
+      'postId': request.body.postId,
+      'userId': request.loggedInUser[0].userId,
+      'vote': request.body.vote,
+    })
+    .then(function(result) {
+      console.log(result);
+      response.redirect('/');
+    })
+    .catch(function(err) {
+      response.send(`${err}`);
     })
   }
 })

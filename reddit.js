@@ -49,7 +49,9 @@ function allPostsQuery(rank) {
       subreddit.description AS "subDescription",
       subreddit.createdAt AS "subCreatedAt",
       subreddit.updatedAt AS "subUpdatedAt",
-      SUM(votes.vote) AS "voteScore"
+      SUM(votes.vote) AS "voteScore",
+      SUM(votes.vote = "1") AS "upvotes",
+      SUM(votes.vote = "-1") AS "downvotes"
     FROM posts
     JOIN users 
       ON (users.id = posts.userId)
@@ -221,6 +223,8 @@ module.exports = function RedditAPI(conn) {
             'postUpdatedAt': data.postUpdatedAt,
             'postUserId': data.postUser,
             'postScore': data.voteScore,
+            'upvotes': data.upvotes,
+            'downvotes': data.downvotes,
             'user': {
               'userId': data.userId,
               'username': data.username,
@@ -325,8 +329,8 @@ module.exports = function RedditAPI(conn) {
       })
     },
     createVote: function createVote(vote) {
+      vote.vote = parseInt(vote.vote);
       if (vote.vote === -1 || vote.vote === 0 || vote.vote === 1) { 
-
         return connQuery(voteQuery, [vote.postId, vote.userId, vote.vote, vote.vote])
         .then(function(result) {
 
@@ -339,7 +343,7 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
         })
       }
-      else {throw new Error('invalid vote')}
+      else {throw new Error(error)}
     },
     checkLogin: function checkLogin(user, password) {
       return connQuery('SELECT * FROM users WHERE username = ?', [user])

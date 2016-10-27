@@ -3,7 +3,7 @@ extends layout.pug
 block content
 	form(action="/posts", method="POST")
 	div(id="contents")
-		h1 Welcome to Reddit!!
+		h1 Welcome to a Reddit Clone!
 		p
 			a(href="http://127.0.0.1:3000/?sort=new")="new"
 			br
@@ -20,4 +20,16 @@ block content
 						content-item_title
 							a(href=post.postUrl)=post.postTitle
 					p Submitted by #{post.user.username}
-					p Score: #{post.score} Upvotes: #{post.upVotes} Downvotes: #{post.downVotes}
+					p Score: #{post.postScore} Upvotes: #{post.upvotes} Downvotes: #{post.downvotes}
+					form(action='/vote', method='POST')
+						input(type='hidden', name='vote', value=1)
+						|  
+						input(type='hidden', name='postId', value=post.postId)
+						|  
+						button(type='submit') upvote this
+					form(action='/vote', method='post')
+						input(type='hidden', name='vote', value=-1)
+						|  
+						input(type='hidden', name='postId', value=post.postId)
+						|  
+						button(type='submit') downvote this
