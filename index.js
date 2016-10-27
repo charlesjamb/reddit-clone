@@ -93,14 +93,25 @@ app.get('/createPost', function(request, response) {
   response.render('create-content');
 })
 
-// app.post('/createPost', function(request, response) {
-//   if (!request.loggedInUser) {
-//     response.status(401).send('You must be logged in to create a post');
-//   }
-//   else {
-
-//   }
-// })
+app.post('/createPost', function(request, response) {
+  if (!request.loggedInUser) {
+    response.status(401).send('You must be logged in to create a post');
+  }
+  else {
+    redditAPI.createPost({
+      'userId': request.loggedInUser[0].userId,
+      'title': request.body.title,
+      'url': request.body.url,
+      'subredditId': 1
+    })
+    .then(function(result) {
+      response.redirect('/?sort=new');
+    })
+    .catch(function(err) {
+      response.send(`${err.stack}`);
+    })
+  }
+})
 
 function checkLoginToken(request, response, next) {
   if (request.cookies.SESSION) {
@@ -108,7 +119,6 @@ function checkLoginToken(request, response, next) {
     .then(function(user) {
       if (user) {
         request.loggedInUser = user;
-        console.log(request.loggedInUser);
       }
       next();
     })
