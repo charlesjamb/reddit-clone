@@ -18,6 +18,19 @@ function crypt(password, HASH_ROUNDS) {
 	});
 }
 
+function hashCompare(plainText, hash) {
+	return new Promise(function(resolve, reject) {
+		bcrypt.compare(plainText, hash, function(err, result) {
+			if (err) {
+				reject(err);
+			}
+			else {
+				resolve(result);
+			}
+		})
+	});
+}
+
 // query to the database
 function makeConnQuery(connection) {
 	return function connQuery(thequery, params) {
@@ -33,7 +46,6 @@ function makeConnQuery(connection) {
 		});
 	}	
 }
-
 
 // stringify the sql query
 function niceQuery(query) {
@@ -86,6 +98,7 @@ function requestJSON(url) {
 }
 
 exports.crypt = crypt;
+exports.hashCompare = hashCompare;
 exports.makeConnQuery = makeConnQuery;
 exports.requestPromise = requestPromise;
 exports.promptPromise = promptPromise;

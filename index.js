@@ -56,8 +56,13 @@ app.get('/login', function(request, response) {
 });
 
 app.post('/login', function(request, response) {
-  // code to login a user
-  // hint: you'll have to use response.cookie here
+  redditAPI.checkLogin(request.body.username, request.body.password)
+  .then(function(result) {
+    response.send(`${result}`);
+  })
+  .catch(function(err) {
+    response.send(`${err}`)
+  })
 });
 
 app.get('/signup', function(request, response) {

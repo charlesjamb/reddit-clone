@@ -72,7 +72,7 @@ const selectAllSubs = `
   ORDER BY subCreatedAt DESC
 `;
 const selectAllPostsForUser = `
-    SELECT
+  SELECT
     posts.id AS "postId", 
     posts.title AS "postTitle", 
     posts.url AS "postUrl", 
@@ -146,7 +146,7 @@ module.exports = function RedditAPI(conn) {
         return connQuery(insertUser, [user.username, hashedPassword, new Date(), new Date()])
       })
       .then(function(result) {
-            // return result;
+
         return connQuery(selectUserId, [result.insertId])
       })
       .then(function(result) {
@@ -335,7 +335,29 @@ module.exports = function RedditAPI(conn) {
         })
       }
       else {throw new Error('invalid vote')}
+    },
+    checkLogin: function checkLogin(user, password) {
+      return connQuery('SELECT * FROM users WHERE username = ?', [user])
+      .then(function(result) {
+        if (result.length === 0) {
+          throw new Error('username or password incorrect');
+        }
+        else {
+          var user = result[0];
+          var actualHashedPassword = user.password;
+
+            return core.hashCompare(password, actualHashedPassword)
+            .then(function(result){
+              return result;
+            })
+            .catch(function(error) {
+              throw new Error('username or password incorrect');
+            })
+        }
+      })
+      .catch(function(error) {
+        throw new Error(error);
+      })
     }
   }
 }
-
