@@ -17,6 +17,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 // This middleware will parse the Cookie header from all requests, and put the result in req.cookies.  Read the docs for more info!
 app.use(cookieParser());
+app.use(checkLoginToken);
 
 // This middleware will console.log every request to your web server! Read the docs for more info!
 app.use(morgan('dev'));
@@ -61,7 +62,8 @@ app.post('/login', function(request, response) {
     
     return redditAPI.createSession(user.id)
     .then(function(token) {
-      response.send(`${token}`);
+        response.cookie('SESSION', token);
+        response.redirect('/login');
     })
   })
   .catch(function(err) {
@@ -86,6 +88,35 @@ app.post('/signup', function(request, response) {
 app.post('/vote', function(request, response) {
   // code to add an up or down vote for a content+user combination
 });
+
+app.get('/createPost', function(request, response) {
+  response.render('create-content');
+})
+
+// app.post('/createPost', function(request, response) {
+//   if (!request.loggedInUser) {
+//     response.status(401).send('You must be logged in to create a post');
+//   }
+//   else {
+
+//   }
+// })
+
+function checkLoginToken(request, response, next) {
+  if (request.cookies.SESSION) {
+    redditAPI.getUserFromSession(request.cookies.SESSION)
+    .then(function(user) {
+      if (user) {
+        request.loggedInUser = user;
+        console.log(request.loggedInUser);
+      }
+      next();
+    })
+  }
+  else {
+    next();
+  }
+}
 
 /* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
 

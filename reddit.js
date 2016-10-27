@@ -373,8 +373,19 @@ module.exports = function RedditAPI(conn) {
       var token = createSessionToken();
       return connQuery('INSERT INTO sessions SET userId = ?, token = ?', [userId, token])
       .then(function(result) {
-        response.cookie('SESSION', token);
-        response.redirect('/login');
+        return token;
+      })
+      .catch(function(error) {
+        throw new Error(error);
+      })
+    },
+    getUserFromSession: function getUserFromSession(cookie) {
+      return connQuery('SELECT * FROM sessions WHERE token = ?', [cookie])
+      .then(function(result) {
+        if (result) {
+          return result;
+        }
+        else {throw new Error('user unknown')}
       })
       .catch(function(error) {
         throw new Error(error);
