@@ -3,6 +3,23 @@ html
 	head
 		meta(charset="utf-8")
 		block title
-			title The Default Title
+			title Welcome to Reddit Clone
 	body
+		header
+			nav
+				h1 Welcome to Reddit Clone
+				ul
+					if user
+						p Logged in
+					else 
+						p Not logged in
+					a(href="http://127.0.0.1:3000/")="Homepage"
+					br
+					a(href="http://127.0.0.1:3000/signup")="Sign Up"
+					br
+					a(href="http://127.0.0.1:3000/login")="Sign In"
+					br
+					a(href="http://127.0.0.1:3000/logout")="Log Out"
+					br
+					a(href="http://127.0.0.1:3000/createPost")="Create a post"
 		block content

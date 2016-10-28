@@ -138,6 +138,10 @@ const getVote = `
   FROM votes  
   WHERE postId = ?
 `;
+const deleteCookieQuery = `
+  DELETE FROM sessions
+  WHERE token = ?
+`;
 
 function createSessionToken() {
   return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
@@ -343,7 +347,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
         })
       }
-      else {throw new Error(error)}
+      else {
+        throw new Error(error)}
     },
     checkLogin: function checkLogin(user, password) {
       return connQuery('SELECT * FROM users WHERE username = ?', [user])
@@ -355,18 +360,15 @@ module.exports = function RedditAPI(conn) {
           var user = result[0];
           var actualHashedPassword = user.password;
 
-            return core.hashCompare(password, actualHashedPassword)
-            .then(function(result){
-              if (result === true) {
-                return user;
-              }
-              else {
-                throw new Error('username or password incorrect');
-              }
-            })
-            .catch(function(error) {
+          return core.hashCompare(password, actualHashedPassword)
+          .then(function(result){
+            if (result === true) {
+              return user;
+            }
+            else {
               throw new Error('username or password incorrect');
-            })
+            }
+          })
         }
       })
       .catch(function(error) {
@@ -390,6 +392,15 @@ module.exports = function RedditAPI(conn) {
           return result;
         }
         else {throw new Error('user unknown')}
+      })
+      .catch(function(error) {
+        throw new Error(error);
+      })
+    },
+    deleteCookie: function deleteCookie(token) {
+      return connQuery(deleteCookieQuery, [token])
+      .then(function(result) {
+        return result;
       })
       .catch(function(error) {
         throw new Error(error);
