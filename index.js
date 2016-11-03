@@ -1,28 +1,30 @@
+//////////////////////////////////////////////////////////////////////////////////////////
 // Dependencies
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
-const reddit = require('./reddit.js');
+const reddit = require('./library/reddit.js');
 const mysql = require('mysql');
 
-const server = express();
+const app = express();
 
-server.locals.pretty = true;
+app.locals.pretty = true;
 
 // Specify the usage of the Pug template engine
-server.set('view engine', 'pug');
+app.set('view engine', 'pug');
 
+//////////////////////////////////////////////////////////////////////////////////////////
 // Middleware
-// This middleware will parse the POST requests coming from an HTML form, and put the result in req.body.  Read the docs for more info!
-server.use(bodyParser.urlencoded({extended: false}));
+// Parse the POST requests coming from an HTML form, and put the result in req.body
+app.use(bodyParser.urlencoded({extended: false}));
 
-// This middleware will parse the Cookie header from all requests, and put the result in req.cookies.  Read the docs for more info!
-server.use(cookieParser());
-server.use(checkLoginToken);
+// Parse the Cookie header from all requests, and put the result in req.cookies
+app.use(cookieParser());
+app.use(checkLoginToken);
 
-// This middleware will console.log every request to your web server! Read the docs for more info!
-server.use(morgan('dev'));
+// Console.log every request to the web server
+app.use(morgan('dev'));
 
 // Acces to the database
 const connection = mysql.createConnection({
@@ -34,8 +36,9 @@ const connection = mysql.createConnection({
 
 const redditAPI = reddit(connection);
 
+////////////////////////////////////////////////////////////////////////////////////////////
 // Resources
-server.get('/', function(request, response) {
+app.get('/', function(request, response) {
   var rank;
   if (request.query.sort === 'new') {
     rank = 'new';
@@ -54,11 +57,11 @@ server.get('/', function(request, response) {
   })
 });
 
-server.get('/login', function(request, response) {
+app.get('/login', function(request, response) {
   response.render('login-page');
 });
 
-server.post('/login', function(request, response) {
+app.post('/login', function(request, response) {
   redditAPI.checkLogin(request.body.username, request.body.password)
   .then(function(user) {
     
@@ -73,11 +76,11 @@ server.post('/login', function(request, response) {
   })
 });
 
-server.get('/signup', function(request, response) {
+app.get('/signup', function(request, response) {
   response.render('signup-page');
 });
 
-server.post('/signup', function(request, response) {
+app.post('/signup', function(request, response) {
   redditAPI.createUser({'username': request.body.username, 'password': request.body.password})
   .then(function(result) {
     response.redirect('/login');
@@ -87,7 +90,7 @@ server.post('/signup', function(request, response) {
   })
 });
 
-server.get('/createPost', function(request, response) {
+app.get('/createPost', function(request, response) {
   if (!request.loggedInUser) {
     response.render('error');
   }
@@ -102,7 +105,7 @@ server.get('/createPost', function(request, response) {
   }
 })
 
-server.post('/createPost', function(request, response) {
+app.post('/createPost', function(request, response) {
   redditAPI.createPost({
     'userId': request.loggedInUser[0].userId,
     'title': request.body.title,
@@ -117,7 +120,7 @@ server.post('/createPost', function(request, response) {
   })
 })
 
-server.post('/vote', function(request, response) {
+app.post('/vote', function(request, response) {
   if (!request.loggedInUser) {
     response.render('error');
   }
@@ -136,7 +139,7 @@ server.post('/vote', function(request, response) {
   }
 })
 
-server.get('/logout', function(request, response) {
+app.get('/logout', function(request, response) {
   if (request.loggedInUser) {
     redditAPI.deleteCookie(request.loggedInUser[0].token)
     .then(function(result) {
@@ -157,8 +160,6 @@ function checkLoginToken(request, response, next) {
     redditAPI.getUserFromSession(request.cookies.SESSION)
     .then(function(user) {
       if (user) {
-                console.log(user[0]);
-        console.log(user);
         request.loggedInUser = user;
         response.locals.user = user[0];
       }
@@ -170,12 +171,11 @@ function checkLoginToken(request, response, next) {
   }
 }
 
-/* YOU DON'T HAVE TO CHANGE ANYTHING BELOW THIS LINE :) */
-
-// Boilerplate code to start up the web server
-const index = server.listen((process.env.PORT || 3000), (process.env.IP || '127.0.0.1'), function () {
-  const host = index.address().address;
-  const port = index.address().port;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Start up the web server
+const server = app.listen((process.env.PORT || 3000), (process.env.IP || '127.0.0.1'), function () {
+  const host = server.address().address;
+  const port = server.address().port;
 
   console.log('Web Server is listening at http://%s:%s', host, port);
 });

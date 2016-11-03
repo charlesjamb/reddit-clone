@@ -1,4 +1,4 @@
-const core = require('./library/basicpromises.js');
+const core = require('./basicpromises.js');
 const secureRandom = require('secure-random');
 const HASH_ROUNDS = 10;
 const insertUser = `
