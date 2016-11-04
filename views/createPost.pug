@@ -1,0 +1,11 @@
+extends layout.pug
+
+block content	
+	h2 Create a post
+	form(action="/createpost", method="POST")
+		input(type="text", name="url", placeholder="Enter a URL to content")
+		input(type="text", name="title", placeholder="Enter the title of your content")
+		select(name="selectedSub")
+			each sub in subs
+				option(value=sub.subId)=sub.subName	
+		button(type="submit") Post!

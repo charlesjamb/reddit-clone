@@ -1,6 +1,9 @@
 const core = require('./basicpromises.js');
 const secureRandom = require('secure-random');
 const HASH_ROUNDS = 10;
+
+///////////////////////////////////////////////////////////////////////////////
+// SQL Queries
 const insertUser = `
   INSERT INTO users 
   (username, password, createdAt, updatedAt) 
@@ -143,6 +146,8 @@ const deleteCookieQuery = `
   WHERE token = ?
 `;
 
+///////////////////////////////////////////////////////////////////////////////
+// API functions
 function createSessionToken() {
   return secureRandom.randomArray(100).map(code => code.toString(36)).join('');
 }
@@ -150,6 +155,8 @@ function createSessionToken() {
 module.exports = function RedditAPI(conn) {
   const connQuery = core.makeConnQuery(conn);
   return {
+
+    ///////////////////////////////////////////////////////////////////////////
     createUser: function createUser(user) {
       return core.crypt(user.password, HASH_ROUNDS)
       .then(function(hashedPassword) {
@@ -173,6 +180,7 @@ module.exports = function RedditAPI(conn) {
         }
       })
     },
+    ///////////////////////////////////////////////////////////////////////////
     createPost: function createPost(post) {
       return connQuery(insertPost, [post.userId, post.title, post.url, new Date(), new Date(), post.subredditId])
       .then(function(result) {
@@ -186,6 +194,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     createSubreddit: function createSubreddit(sub) {
       return connQuery(insertSub, [sub.name, sub.description, new Date(), new Date()])
       .then(function(result) {
@@ -199,6 +209,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     getAllPosts: function getAllPosts(ranking, options) {
       if (!options) {
         options = {};
@@ -249,6 +261,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     getAllSubreddit: function getAllSubreddit() {
       return connQuery(selectAllSubs)
       .then(function(result) {
@@ -266,6 +280,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     getAllPostsForUser: function getAllPostsForUser(userId, options) {
       if (!options) {
         options = {};
@@ -303,6 +319,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     getSinglePost: function getSinglePost(postId) {
       return connQuery(selectSinglePost, postId)
       .then(function(data) {
@@ -332,6 +350,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     createVote: function createVote(vote) {
       vote.vote = parseInt(vote.vote);
       if (vote.vote === -1 || vote.vote === 0 || vote.vote === 1) { 
@@ -350,6 +370,8 @@ module.exports = function RedditAPI(conn) {
       else {
         throw new Error(error)}
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     checkLogin: function checkLogin(user, password) {
       return connQuery('SELECT * FROM users WHERE username = ?', [user])
       .then(function(result) {
@@ -375,6 +397,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     createSession: function createSession(userId) {
       var token = createSessionToken();
       return connQuery('INSERT INTO sessions SET userId = ?, token = ?', [userId, token])
@@ -385,6 +409,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     getUserFromSession: function getUserFromSession(cookie) {
       return connQuery('SELECT * FROM sessions WHERE token = ?', [cookie])
       .then(function(result) {
@@ -397,6 +423,8 @@ module.exports = function RedditAPI(conn) {
         throw new Error(error);
       })
     },
+
+    ///////////////////////////////////////////////////////////////////////////
     deleteCookie: function deleteCookie(token) {
       return connQuery(deleteCookieQuery, [token])
       .then(function(result) {

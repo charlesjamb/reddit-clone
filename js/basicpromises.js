@@ -4,7 +4,8 @@ const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const HASH_ROUNDS = 10;
 
-// hash a password with bcrypt
+///////////////////////////////////////////////////////////////////////////////
+// Bcrypt - generate hash passwords
 function crypt(password, HASH_ROUNDS) {
 	return new Promise(function(resolve, reject) {
 		bcrypt.hash(password, HASH_ROUNDS, function(err, hashedPassword) {
@@ -31,7 +32,8 @@ function hashCompare(plainText, hash) {
 	});
 }
 
-// query to the database
+///////////////////////////////////////////////////////////////////////////////
+// Query to the database
 function makeConnQuery(connection) {
 	return function connQuery(thequery, params) {
 		return new Promise(function(resolve, reject) {
@@ -47,8 +49,7 @@ function makeConnQuery(connection) {
 	}	
 }
 
-// stringify the sql query
-function niceQuery(query) {
+function stringifyQuery(query) {
 	return (
 		connectionQuery(query)
 		.then(function(result) {
@@ -58,7 +59,8 @@ function niceQuery(query) {
 	);
 }
 
-// request promise
+///////////////////////////////////////////////////////////////////////////////
+// Request promise
 function requestPromise(url) {
 	return new Promise(function(resolve, reject) {
 		request(url, function(err, result) {
@@ -72,7 +74,18 @@ function requestPromise(url) {
 	});
 }
 
-// prompt promise
+function stringifyRequest(url) {
+	return ( 
+		requestPromise(url)
+		.then(function(result) {
+			var actualResult = JSON.parse(result.body);
+			return actualResult;
+		})
+	);	
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Prompt promise
 function promptPromise(question) {
 	return new Promise(function(resolve, reject) {
 		prompt.get(question, function(err, answer) {
@@ -86,21 +99,12 @@ function promptPromise(question) {
 	});
 }
 
-// request as JSON
-function requestJSON(url) {
-	return ( 
-		requestPromise(url)
-		.then(function(result) {
-			var actualResult = JSON.parse(result.body);
-			return actualResult;
-		})
-	);	
-}
-
+///////////////////////////////////////////////////////////////////////////////
+// Exports
 exports.crypt = crypt;
 exports.hashCompare = hashCompare;
 exports.makeConnQuery = makeConnQuery;
 exports.requestPromise = requestPromise;
 exports.promptPromise = promptPromise;
-exports.requestJSON = requestJSON;
-exports.niceQuery = niceQuery; 
+exports.requestJSON = stringifyRequest;
+exports.niceQuery = stringifyQuery; 

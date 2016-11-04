@@ -1,20 +1,21 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-// Dependencies
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
-const reddit = require('./library/reddit.js');
+const reddit = require('./js/reddit.js');
 const mysql = require('mysql');
 
 const app = express();
 
 app.locals.pretty = true;
 
+app.use('/styles', express.static('css'));
+app.use('/scripts', express.static('js'));
+app.use('/fonts', express.static('font'));
 // Specify the usage of the Pug template engine
 app.set('view engine', 'pug');
 
-//////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Middleware
 // Parse the POST requests coming from an HTML form, and put the result in req.body
 app.use(bodyParser.urlencoded({extended: false}));
@@ -36,8 +37,10 @@ const connection = mysql.createConnection({
 
 const redditAPI = reddit(connection);
 
-////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Resources
+
+// Frontpage
 app.get('/', function(request, response) {
   var rank;
   if (request.query.sort === 'new') {
@@ -50,18 +53,20 @@ app.get('/', function(request, response) {
 
   redditAPI.getAllPosts(rank, {numPerPage: 25, page: 0})
   .then(function(posts) {
-    response.render('post-list', {posts: posts});
+    response.render('frontpage', {posts: posts});
   })
-  .catch(function(err) {
-    response.status(500).send(`${err.stack}`);
+  .catch(function(error) {
+    response.status(500).send(`${error.stack}`);
   })
 });
 
-app.get('/login', function(request, response) {
-  response.render('login-page');
+///////////////////////////////////////////////////////////////////////////////
+// Sign in
+app.get('/signin', function(request, response) {
+  response.render('signIn');
 });
 
-app.post('/login', function(request, response) {
+app.post('/signin', function(request, response) {
   redditAPI.checkLogin(request.body.username, request.body.password)
   .then(function(user) {
     
@@ -71,41 +76,63 @@ app.post('/login', function(request, response) {
         response.redirect('/');
     })  
   })
-  .catch(function(err) {
-    response.send(`${err.stack}`)
+  .catch(function(error) {
+    response.send(`${error.stack}`)
   })
 });
 
+///////////////////////////////////////////////////////////////////////////////
+// Sign up
 app.get('/signup', function(request, response) {
-  response.render('signup-page');
+  response.render('signUp');
 });
 
 app.post('/signup', function(request, response) {
   redditAPI.createUser({'username': request.body.username, 'password': request.body.password})
   .then(function(result) {
-    response.redirect('/login');
+    response.redirect('/signIn');
   })
-  .catch(function(err) {
-    response.status(500).send(`${err.stack}`);
+  .catch(function(error) {
+    response.status(500).send(`${error.stack}`);
   })
 });
 
-app.get('/createPost', function(request, response) {
+///////////////////////////////////////////////////////////////////////////////
+// Logout
+app.get('/logout', function(request, response) {
+  if (request.loggedInUser) {
+    redditAPI.deleteCookie(request.loggedInUser[0].token)
+    .then(function(result) {
+      response.clearCookie('SESSION')
+      response.render('logout')
+    })
+    .catch(function(error) {
+      response.send(`${error}`);
+    })
+  }
+  else {
+    response.render('logout');
+  }
+})
+
+///////////////////////////////////////////////////////////////////////////////
+// Create post
+app.get('/createpost', function(request, response) {
   if (!request.loggedInUser) {
-    response.render('error');
+    response.render('notSignIn');
   }
   else {
     redditAPI.getAllSubreddit()
     .then(function(subs) {
-      response.render('create-content', {subs: subs});
+      response.render('createPost', {subs: subs});
     })
-    .catch(function(err) {
-      response.send(`${err.stack}`)
+    .catch(function(error) {
+      response.send(`${error.stack}`)
     })
   }
 })
 
-app.post('/createPost', function(request, response) {
+app.post('/createpost', function(request, response) {
   redditAPI.createPost({
     'userId': request.loggedInUser[0].userId,
     'title': request.body.title,
@@ -115,14 +142,16 @@ app.post('/createPost', function(request, response) {
   .then(function(result) {
     response.redirect('/?sort=new');
   })
-  .catch(function(err) {
-    response.send(`${err.stack}`);
+  .catch(function(error) {
+    response.send(`${error.stack}`);
   })
 })
 
+///////////////////////////////////////////////////////////////////////////////
+// Voting system
 app.post('/vote', function(request, response) {
   if (!request.loggedInUser) {
-    response.render('error');
+    response.render('notSignIn');
   }
   else {
     redditAPI.createVote({
@@ -133,28 +162,14 @@ app.post('/vote', function(request, response) {
     .then(function(result) {
       response.redirect('/');
     })
-    .catch(function(err) {
-      response.send(`${err}`);
+    .catch(function(error) {
+      response.send(`${error}`);
     })
   }
 })
 
-app.get('/logout', function(request, response) {
-  if (request.loggedInUser) {
-    redditAPI.deleteCookie(request.loggedInUser[0].token)
-    .then(function(result) {
-      response.clearCookie('SESSION')
-      response.render('logout')
-    })
-    .catch(function(err) {
-      response.send(`${err}`);
-    })
-  }
-  else {
-    response.render('logout');
-  }
-})
-
+///////////////////////////////////////////////////////////////////////////////
+// Check identifiants
 function checkLoginToken(request, response, next) {
   if (request.cookies.SESSION) {
     redditAPI.getUserFromSession(request.cookies.SESSION)
@@ -171,8 +186,8 @@ function checkLoginToken(request, response, next) {
   }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Start up the web server
+///////////////////////////////////////////////////////////////////////////////
+// Start web server
 const server = app.listen((process.env.PORT || 3000), (process.env.IP || '127.0.0.1'), function () {
   const host = server.address().address;
   const port = server.address().port;

@@ -1,0 +1,30 @@
+extends layout.pug
+
+block content
+	h2 Frontpage
+	ul
+		li
+			a(href="/?sort=new") new
+		li
+			a(href="/?sort=hot") hot
+		li
+			a(href="/?sort=top") top
+	ul
+	each post in posts
+		li
+			h3
+				a(href=post.postUrl)=post.postTitle
+			p Submitted by #{post.user.username}
+			p Score: #{post.postScore} Upvotes: #{post.upvotes} Downvotes: #{post.downvotes}
+			form(action='/vote', method='POST')
+				input(type='hidden', name='vote', value=1)
+				|  
+				input(type='hidden', name='postId', value=post.postId)
+				|  
+				button(type='submit') upvote this
+			form(action='/vote', method='post')
+				input(type='hidden', name='vote', value=-1)
+				|  
+				input(type='hidden', name='postId', value=post.postId)
+				|  
+				button(type='submit') downvote this
