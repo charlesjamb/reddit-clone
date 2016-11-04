@@ -6,23 +6,31 @@ html
 			title Welcome to Reddit Clone
 		link(rel="stylesheet", href="/styles/bootstrap.css", type="text/css")
 	body
-		header
-			h1 Welcome to Reddit Clone
-			if user
-				p Logged in
-			else 
-				p Not logged in
-			ul
-				li
-					a(href="/") Homepage
-				li
-					a(href="/signup") Sign Up
-				li
-					a(href="/signin") Sign In
-				li
-					a(href="/logout") Log Out
-				li
-					a(href="/createPost") Create a post
+		.container
+			nav.navbar.navbar-default
+				.container-fluid
+					.navbar-header
+						p.navbar-brand Reddit Clone
+					#navbar
+						ul.nav.navbar-nav
+							li
+								a(href="/") Frontpage
+							li
+								a(href="/signup") Sign Up
+							li
+								a(href="/signin") Sign In
+							li
+								a(href="/logout") Log Out
+							li
+								a(href="/createPost") Create a post
+							if user
+								li
+									a(href='/logout') 
+										p.text-success Logged In
+							else
+								li
+									a(href='/signin') 
+										p.text-warning Not logged in
 		block content
 		script(src="https://code.jquery.com/jquery-3.1.1.js")
 		script(src="https://code.jquery.com/jquery-migrate-3.0.0.js")

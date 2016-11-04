@@ -1,30 +1,41 @@
 extends layout.pug
 
 block content
-	h2 Frontpage
-	ul
-		li
-			a(href="/?sort=new") new
-		li
-			a(href="/?sort=hot") hot
-		li
-			a(href="/?sort=top") top
-	ul
-	each post in posts
-		li
-			h3
-				a(href=post.postUrl)=post.postTitle
-			p Submitted by #{post.user.username}
-			p Score: #{post.postScore} Upvotes: #{post.upvotes} Downvotes: #{post.downvotes}
-			form(action='/vote', method='POST')
-				input(type='hidden', name='vote', value=1)
-				|  
-				input(type='hidden', name='postId', value=post.postId)
-				|  
-				button(type='submit') upvote this
-			form(action='/vote', method='post')
-				input(type='hidden', name='vote', value=-1)
-				|  
-				input(type='hidden', name='postId', value=post.postId)
-				|  
-				button(type='submit') downvote this
+	.container
+		.jumbotron
+			h1.display-1 Welcome to Reddit Clone
+			p.leading This project is a copy of the main functionalites of 
+				a(href="www.reddit.com") Reddit
+			p.leading The technologies used include:
+				button.btn.btn-primary.btn-ln(href='https://nodejs.org/') NodeJs
+				button.btn.btn-info.btn-ln(href='http://expressjs.com/') ExpressJs
+				button.btn.btn-danger.btn-ln(href='https://pugjs.org/') PugJs
+				button.btn.btn-warning.btn-ln(href='http://getbootstrap.com/') Bootstrap
+	.container
+		h2 Frontpage
+		ul
+			li
+				a(href="/?sort=new") new
+			li
+				a(href="/?sort=hot") hot
+			li
+				a(href="/?sort=top") top
+		ul
+		each post in posts
+			li
+				h3
+					a(href=post.postUrl)=post.postTitle
+				p Submitted by #{post.user.username}
+				p Score: #{post.postScore} Upvotes: #{post.upvotes} Downvotes: #{post.downvotes}
+				form(action='/vote', method='POST')
+					input(type='hidden', name='vote', value=1)
+					|  
+					input(type='hidden', name='postId', value=post.postId)
+					|  
+					button.btn.btn-success(type='submit') upvote this
+				form(action='/vote', method='post')
+					input(type='hidden', name='vote', value=-1)
+					|  
+					input(type='hidden', name='postId', value=post.postId)
+					|  
+					button.btn.btn-danger(type='submit') downvote this
