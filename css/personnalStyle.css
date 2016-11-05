@@ -1,0 +1,23 @@
+body {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+li {
+	list-style: none;
+}
+
+.post-info{
+	height: 100px;
+	overflow: auto;
+}
+
+.upvote, .downvote {
+	display: inline;
+}
+
+.post-div {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}

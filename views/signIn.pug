@@ -1,8 +1,14 @@
 extends layout.pug
 
 block content
-	h2 Sign in here:
-	form(action="/signin", method="POST")
-		input(type="text", name="username", placeholder="Enter your username here")
-		input(type="password", name="password", placeholder="Enter your password here")
-		button(type="submit") Sign in!
+	.container
+		.jumbotron
+			h1.display-1 Sign in here:
+			form(action="/signin", method="POST")
+				.form-group
+					label(for='username') Enter your username:
+					input#username.form-control(type="text", name="username", placeholder="username")
+				.form-group
+					label(for='password') Enter your password:
+					input#password.form-control(type="password", name="password", placeholder="password")
+				button.btn.btn-success.btn-ln(type="submit") Sign in!

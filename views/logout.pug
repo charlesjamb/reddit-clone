@@ -1,9 +1,11 @@
 extends layout.pug
 
 block content
-	if user
-		h2 Sorry to see you go ...
-		p (╯°□°）╯︵ ┻━┻)
-	else
-		h2 ( ་ ⍸ ་ )
-		p You are already not logged in ...
+	.container
+		.jumbotron
+			if user
+				h1.display-1 (╯°□°）╯︵ ┻━┻)
+				p.lead Sorry to see you go ...
+			else
+				h1.display-1 ( ་ ⍸ ་ )
+				p.lead You are already not logged in ...

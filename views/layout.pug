@@ -5,16 +5,18 @@ html
 		block title
 			title Welcome to Reddit Clone
 		link(rel="stylesheet", href="/styles/bootstrap.css", type="text/css")
+		link(rel="stylesheet", href="/styles/personnalStyle.css", type="text/css")
 	body
 		.container
 			nav.navbar.navbar-default
 				.container-fluid
 					.navbar-header
-						p.navbar-brand Reddit Clone
+						p.navbar-brand
+							a(href="/") Reddit Clone
 					#navbar
 						ul.nav.navbar-nav
 							li
-								a(href="/") Frontpage
+								a(href="/frontpage") Frontpage
 							li
 								a(href="/signup") Sign Up
 							li

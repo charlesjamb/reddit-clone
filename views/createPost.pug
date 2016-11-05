@@ -1,11 +1,20 @@
 extends layout.pug
 
-block content	
-	h2 Create a post
-	form(action="/createpost", method="POST")
-		input(type="text", name="url", placeholder="Enter a URL to content")
-		input(type="text", name="title", placeholder="Enter the title of your content")
-		select(name="selectedSub")
-			each sub in subs
-				option(value=sub.subId)=sub.subName	
-		button(type="submit") Post!
+block content
+	.container
+		.jumbotron
+			h1.display-1 Create a post
+			form(action="/createpost", method="POST")
+				.form-group
+					label(for='url') Enter the url you want to share:
+					input#url.form-control(type="text", name="url", placeholder="url")
+					button.btn.btn-default.btn-sm suggest title
+				.form-group
+					label(for='title') Enter the title of your post:
+					input#title.form-control(type="text", name="title", placeholder="title")
+				label Choose a subreddit
+				select.btn.btn-default.dropdown-toggle(name="selectedSub")
+					each sub in subs
+						option(value=sub.subId)=sub.subName
+				br
+				button.btn.btn-success(type="submit") Post!
