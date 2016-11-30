@@ -5,7 +5,7 @@
 CREATE TABLE `users` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `username` VARCHAR(50) NOT NULL,
-  `password` VARCHAR(60) NOT NULL, -- why 60??? ask me :)
+  `password` VARCHAR(60) NOT NULL,
   `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
@@ -22,7 +22,7 @@ CREATE TABLE `posts` (
   `createdAt` DATETIME NOT NULL,
   `updatedAt` DATETIME NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `userId` (`userId`), -- why did we add this here? ask me :)
+  KEY `userId` (`userId`),
   CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE SET NULL
 );
 
@@ -55,7 +55,7 @@ CREATE TABLE `votes` (
 -- Adding the sessions table
 CREATE TABLE `sessions` (
   `userId` INT NOT NULL,
-  `token` VARCHAR(1000),
+  `token` VARCHAR(250),
   PRIMARY KEY (`token`),
   FOREIGN KEY (userId) REFERENCES users(id)
 );
