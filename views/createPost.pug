@@ -8,7 +8,6 @@ block content
 				.form-group
 					label(for='url') Enter the url you want to share:
 					input#url.form-control(type="text", name="url", placeholder="url")
-					button.btn.btn-default.btn-sm suggest title
 				.form-group
 					label(for='title') Enter the title of your post:
 					input#title.form-control(type="text", name="title", placeholder="title")
@@ -18,3 +17,4 @@ block content
 						option(value=sub.subId)=sub.subName
 				br
 				button.btn.btn-success(type="submit") Post!
+			button#suggestTitle.btn.btn-default.btn-sm suggest title

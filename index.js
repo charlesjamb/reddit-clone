@@ -1,4 +1,4 @@
-// TDO
+// TODO
 // get rid of form for vote
 // each btn data attribute that has postId
 // value hardcoded on the backend
@@ -9,6 +9,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const core = require('./js/basicpromises.js');
 const reddit = require('./js/reddit.js');
 const mysql = require('mysql');
 
@@ -161,6 +162,25 @@ app.post('/createpost', function(request, response) {
 })
 
 ///////////////////////////////////////////////////////////////////////////////
+// Suggest title
+app.get('/suggesttile', function(request, response) {
+  // let userUrl = request.query.url
+  core.requestPromise('http://www.decodemtl.com')
+  .then(function(result) {
+    var requestedPageTitle = (result.body).split('<title>')[1].split('</title>')[0];
+    response.send(requestedPageTitle);
+
+  })
+  .catch(function(error) {
+    response.send(`${error.stack}`);
+  })
+})
+
+app.post('suggesttile', function(request, response) {
+  console.log(requestedPageTitle);
+})
+
+///////////////////////////////////////////////////////////////////////////////
 // Voting system
 app.post('/vote', function(request, response) {
   if (!request.loggedInUser) {
@@ -176,7 +196,7 @@ app.post('/vote', function(request, response) {
       response.redirect('/frontpage');
     })
     .catch(function(error) {
-      response.send(`${error}`);
+      response.send(`${error.stack}`);
     })
   }
 })
