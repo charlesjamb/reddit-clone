@@ -227,7 +227,7 @@ function checkLoginToken(request, response, next) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Start web server
-const server = app.listen((process.env.PORT || 3000), (process.env.IP || '127.0.0.1'), function () {
+const server = app.listen((process.env.PORT), function () {
   const host = server.address().address;
   const port = server.address().port;
 
