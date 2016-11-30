@@ -34,12 +34,18 @@ app.use(checkLoginToken);
 app.use(morgan('dev'));
 
 // Acces to the database
-const connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : 'sqltemppassword',
-  database : 'reddit'
-});
+const connection;
+if (process.env.CLEARDB_DATABASE_URL) {
+  connection = mysql.createConnection(process.env.CLEARDB_DATABASE_URL);
+}
+else { 
+  connection = mysql.createConnection({
+    host     : 'localhost',
+    user     : 'root',
+    password : 'sqltemppassword',
+    database : 'reddit'
+  });
+}
 
 const redditAPI = reddit(connection);
 
