@@ -1,5 +1,3 @@
--- Modify column 
-
 -- This creates the users table. The username field is constrained to unique
 -- values only, by using a UNIQUE KEY on that column
 CREATE TABLE `users` (

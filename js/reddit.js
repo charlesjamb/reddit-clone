@@ -1,150 +1,7 @@
 const core = require('./basicpromises.js');
 const secureRandom = require('secure-random');
+const q = require('./queries'); 
 const HASH_ROUNDS = 10;
-
-///////////////////////////////////////////////////////////////////////////////
-// SQL Queries
-const insertUser = `
-  INSERT INTO users 
-  (username, password, createdAt, updatedAt) 
-  VALUES (?, ?, ?, ?)
-`;
-const insertPost = `
-  INSERT INTO posts 
-  (userId, title, url, createdAt, updatedAt, subredditId) 
-  VALUES (?, ?, ?, ?, ?, ?)
-`;
-const insertSub = `
-  INSERT INTO subreddit
-  (name, description, createdAt, updatedAt) 
-  VALUES (?, ?, ?, ?)
-`;
-const selectUserId = `
-  SELECT id, username, createdAt, updatedAt
-  FROM users
-  WHERE id = ?
-`;
-const selectPostId = `
-  SELECT id, title, url, userId, createdAt, updatedAt, subredditId 
-  FROM posts 
-  WHERE id = ?
-`;
-const selectSubId = `
-  SELECT id, name, description, createdAt, updatedAt
-  FROM subreddit
-  WHERE id = ?
-`;
-function allPostsQuery(rank) { 
-  return  `
-    SELECT
-      posts.id AS "postId", 
-      posts.title AS "postTitle", 
-      posts.url AS "postUrl", 
-      posts.userId AS "postUser", 
-      users.id AS "userId",
-      posts.createdAt AS "postCreatedAt",
-      posts.updatedAt AS "postUpdatedAt",
-      users.username AS "username", 
-      users.createdAt AS "userCreatedAt", 
-      users.updatedAt AS "userUpdatedAt",
-      subreddit.id AS "subId",
-      subreddit.name AS "subName",
-      subreddit.description AS "subDescription",
-      subreddit.createdAt AS "subCreatedAt",
-      subreddit.updatedAt AS "subUpdatedAt",
-      SUM(votes.vote) AS "voteScore",
-      SUM(votes.vote = "1") AS "upvotes",
-      SUM(votes.vote = "-1") AS "downvotes"
-    FROM posts
-    JOIN users 
-      ON (users.id = posts.userId)
-    JOIN subreddit
-      ON (subreddit.id = posts.subredditId)
-    LEFT JOIN votes 
-      ON (posts.id = votes.postId)
-    GROUP BY posts.id
-    ORDER BY `  +rank+
-    `LIMIT ? OFFSET ?
-  `;
-}
-const selectAllSubs = `
-  SELECT
-    subreddit.id AS "subId",
-    subreddit.name AS "subName",
-    subreddit.description AS "subDescription",
-    subreddit.createdAt AS "subCreatedAt",
-    subreddit.updatedAt AS "subUpdatedAt"
-  FROM subreddit
-  ORDER BY subCreatedAt DESC
-`;
-const selectAllPostsForUser = `
-  SELECT
-    posts.id AS "postId", 
-    posts.title AS "postTitle", 
-    posts.url AS "postUrl", 
-    posts.userId AS "postUser",
-    posts.createdAt AS "postCreatedAt",
-    posts.updatedAt AS "postUpdatedAt",
-    users.id AS "userId", 
-    users.username AS "username", 
-    users.createdAt AS "userCreatedAt", 
-    users.updatedAt AS "userUpdatedAt",
-    subreddit.id AS "subId",
-    subreddit.name AS "subName",
-    subreddit.description AS "subDescription",
-    subreddit.createdAt AS "subCreatedAt",
-    subreddit.updatedAt AS "subUpdatedAt"
-  FROM posts
-  JOIN users 
-    ON (users.id = posts.userId)
-  JOIN subreddit
-    ON (subreddit.id = posts.subredditId)
-  WHERE userId = ?
-  ORDER BY posts.createdAt DESC
-  LIMIT ? OFFSET ?
-`;
-const selectSinglePost = `
-  SELECT
-    posts.id AS "postId", 
-    posts.title AS "postTitle", 
-    posts.url AS "postUrl",
-    posts.createdAt AS "postCreatedAt",
-    posts.updatedAt AS "postUpdatedAt",
-    posts.userId AS "postUser", 
-    users.id AS "userId", 
-    users.username AS "username", 
-    users.createdAt AS "userCreatedAt", 
-    users.updatedAt AS "userUpdatedAt",
-    subreddit.id AS "subId",
-    subreddit.name AS "subName",
-    subreddit.description AS "subDescription",
-    subreddit.createdAt AS "subCreatedAt",
-    subreddit.updatedAt AS "subUpdatedAt"
-  FROM posts
-  JOIN users 
-    ON (users.id = posts.userId)
-  JOIN subreddit
-    ON (subreddit.id = posts.subredditId)
-  WHERE posts.id = ?
-  LIMIT 1
-`;
-const voteQuery = `
-  INSERT INTO votes 
-  SET postId=?, userId=?, vote=? 
-  ON DUPLICATE KEY UPDATE vote=?;
-`;
-const getVote = `
-  SELECT
-    postId,
-    userId, 
-    vote
-  FROM votes  
-  WHERE postId = ?
-`;
-const deleteCookieQuery = `
-  DELETE FROM sessions
-  WHERE token = ?
-`;
 
 ///////////////////////////////////////////////////////////////////////////////
 // API functions
@@ -161,11 +18,11 @@ module.exports = function RedditAPI(conn) {
       return core.crypt(user.password, HASH_ROUNDS)
       .then(function(hashedPassword) {
 
-        return connQuery(insertUser, [user.username, hashedPassword, new Date(), new Date()])
+        return connQuery(q.insertUser, [user.username, hashedPassword, new Date(), new Date()])
       })
       .then(function(result) {
 
-        return connQuery(selectUserId, [result.insertId])
+        return connQuery(q.selectUserId, [result.insertId])
       })
       .then(function(result) {
 
@@ -182,10 +39,10 @@ module.exports = function RedditAPI(conn) {
     },
     ///////////////////////////////////////////////////////////////////////////
     createPost: function createPost(post) {
-      return connQuery(insertPost, [post.userId, post.title, post.url, new Date(), new Date(), post.subredditId])
+      return connQuery(q.insertPost, [post.userId, post.title, post.url, new Date(), new Date(), post.subredditId])
       .then(function(result) {
 
-        return connQuery(selectPostId, [result.insertId])
+        return connQuery(q.selectPostId, [result.insertId])
       })
       .then(function(result) {
         return result[0];
@@ -197,10 +54,10 @@ module.exports = function RedditAPI(conn) {
 
     ///////////////////////////////////////////////////////////////////////////
     createSubreddit: function createSubreddit(sub) {
-      return connQuery(insertSub, [sub.name, sub.description, new Date(), new Date()])
+      return connQuery(q.insertSub, [sub.name, sub.description, new Date(), new Date()])
       .then(function(result) {
 
-        return connQuery(selectSubId, [result.insertId])
+        return connQuery(q.selectSubId, [result.insertId])
       })
       .then(function(result) {
         return result[0];
@@ -227,7 +84,7 @@ module.exports = function RedditAPI(conn) {
       else {
         var rank = 'posts.createdAt DESC ';
       }
-      var queryAll  = allPostsQuery(rank);
+      var queryAll  = q.allPostsQuery(rank);
       return connQuery(queryAll, [limit, offset])
       .then(function(result) {
         return result.map(function(data) {
@@ -264,7 +121,7 @@ module.exports = function RedditAPI(conn) {
 
     ///////////////////////////////////////////////////////////////////////////
     getAllSubreddit: function getAllSubreddit() {
-      return connQuery(selectAllSubs)
+      return connQuery(q.selectAllSubs)
       .then(function(result) {
         return result.map(function(data) {
           return {
@@ -289,7 +146,7 @@ module.exports = function RedditAPI(conn) {
       var limit = options.numPerPage || 25;
       var offset = (options.page || 0) * limit;
 
-      return connQuery(selectAllPostsForUser, [userId, limit, offset])
+      return connQuery(q.selectAllPostsForUser, [userId, limit, offset])
       .then(function(result) {
         return result.map(function(data) {
           return {
@@ -322,7 +179,7 @@ module.exports = function RedditAPI(conn) {
 
     ///////////////////////////////////////////////////////////////////////////
     getSinglePost: function getSinglePost(postId) {
-      return connQuery(selectSinglePost, postId)
+      return connQuery(q.selectSinglePost, postId)
       .then(function(data) {
         return {
           'postId': data[0].postId,
@@ -355,7 +212,7 @@ module.exports = function RedditAPI(conn) {
     createVote: function createVote(vote) {
       vote.vote = parseInt(vote.vote);
       if (vote.vote === -1 || vote.vote === 0 || vote.vote === 1) { 
-        return connQuery(voteQuery, [vote.postId, vote.userId, vote.vote, vote.vote])
+        return connQuery(q.voteQuery, [vote.postId, vote.userId, vote.vote, vote.vote])
         .then(function(result) {
 
           return connQuery(getVote, [vote.postId])
@@ -426,7 +283,7 @@ module.exports = function RedditAPI(conn) {
 
     ///////////////////////////////////////////////////////////////////////////
     deleteCookie: function deleteCookie(token) {
-      return connQuery(deleteCookieQuery, [token])
+      return connQuery(q.deleteCookieQuery, [token])
       .then(function(result) {
         return result;
       })

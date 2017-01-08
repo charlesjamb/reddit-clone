@@ -1,10 +1,3 @@
-// TODO
-// get rid of form for vote
-// each btn data attribute that has postId
-// value hardcoded on the backend
-// selector on all the upvote make query
-
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -227,12 +220,9 @@ function checkLoginToken(request, response, next) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Start web server
-const server = app.listen((process.env.PORT), function () {
+const server = app.listen((process.env.PORT || 3030), function () {
   const host = server.address().address;
   const port = server.address().port;
 
   console.log('Web Server is listening at http://%s:%s', host, port);
 });
-
-// On browser
-// http://127.0.0.1:3000/
